@@ -2,13 +2,15 @@
 #include <stdlib.h>
 #include <math.h>
 
-double **matrixProduct(int m, double **m1, double **m2);
+double **matrixProduct(int n, int m, int p, double **m1, double **m2);
 double **build_L(int m);
 double **build_K(int m);
+double **nullMatrix(int size);
 void printMatrix(int size, double **matrix);
 void freeMatrix(int size, double **matrix);
 
-int main(int argc, char *argv[]){
+int
+main(int argc, char *argv[]){
     if (argc < 2){
         printf("Please supply the m (integer) value as a "
                "parameter to the program\n");
@@ -21,7 +23,7 @@ int main(int argc, char *argv[]){
     double **A;
     double **K = build_K(size);
     double **L = build_L(size);
-    A = matrixProduct(size, L, K);
+    A = matrixProduct(size, size, size, L, K);
     printMatrix(size, A);
 
     freeMatrix(size, K);
@@ -33,8 +35,7 @@ int main(int argc, char *argv[]){
 
 double **
 build_K(int size){
-    double **K;
-    nullMatrix(size, K);
+    double **K = nullMatrix(size);
 
     double alfa = M_PI / 4;
 
@@ -55,8 +56,7 @@ build_K(int size){
 
 double **
 build_L(int size){
-    double **L;
-    nullMatrix(size, L);
+    double **L = nullMatrix(size);
 
     double beta = M_PI / 4;
 
@@ -81,9 +81,9 @@ build_L(int size){
 }
 
 /* Allocate matrix of size x size, and initialize it with all 0 */
-void
-nullMatrix(int size, double **matrix){
-    matrix = malloc(size * sizeof(*L));
+double **
+nullMatrix(int size){
+    double **matrix = malloc(size * sizeof(*matrix));
     int i, j;
 
     for(i = 0; i < size; i++){
@@ -94,24 +94,25 @@ nullMatrix(int size, double **matrix){
             matrix[i][j] = 0;
         }
     }
+    return matrix;
 }
 
 /* naive algorithm: O(n^3) */
 double **
-matrixProduct(int size, double **m1, double **m2){
-    double **answ = malloc(size * sizeof(*answ));
+matrixProduct(int n, int m, int p, double **m1, double **m2){
+    double **answ = malloc(n * sizeof(*answ));
     int i, j, k;
 
-    for(i = 0; i < size; i++){
-        answ[i] = malloc(size * sizeof(*answ[i]));
+    for(i = 0; i < p; i++){
+        answ[i] = malloc(p * sizeof(*answ[i]));
     }
 
     double value;
 
-    for(i = 0; i < size; i++){
-        for(j = 0; j < size; j++){
+    for(i = 0; i < n; i++){
+        for(j = 0; j < p; j++){
             value = 0;
-            for(k = 0; k < size; k++){
+            for(k = 0; k < m; k++){
                 value += m1[i][k] * m2[k][j];
             }
             answ[i][j] = value;
@@ -142,3 +143,16 @@ freeMatrix(int size, double **matrix){
     }
     free(matrix);
 }
+
+void
+powerIteration(int size){
+    double *p = malloc(size * sizeof(*p));
+}
+
+/*
+typedef struct{
+    double **matrix;
+    int rows;
+    int cols;
+} Matrix;
+*/

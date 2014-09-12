@@ -19,8 +19,8 @@ int main(int argc, char *argv[]){
     int size = 2 * m;
 
     double **A;
-    double **K = build_K(m);
-    double **L = build_L(m);
+    double **K = build_K(size);
+    double **L = build_L(size);
     A = matrixProduct(size, L, K);
     printMatrix(size, A);
 
@@ -31,32 +31,34 @@ int main(int argc, char *argv[]){
     return EXIT_SUCCESS;
 }
 
-void
-freeMatrix(int size, double **matrix){
-    int i;
-    for(i = 0; i < size; i++){
-        free(matrix[i]);
+double **
+build_K(int size){
+    double **K;
+    nullMatrix(size, K);
+
+    double alfa = M_PI / 4;
+
+    double a = cos(alfa);
+    double b = sin(alfa);
+    double c = -b;
+
+    size--;
+    while(size > 0){
+        K[size][size]     = a;
+        K[size-1][size-1] = a;
+        K[size][size-1]   = c;
+        K[size-1][size]   = b;
+        size -= 2;
     }
-    free(matrix);
+    return K;
 }
 
 double **
-build_L(int m){
-    int size = 2*m;
-    double **L = malloc(size * sizeof(*L));
-    int i, j;
+build_L(int size){
+    double **L;
+    nullMatrix(size, L);
 
-    for(i = 0; i < size; i++){
-        L[i] = malloc(size * sizeof(*L[i]));
-    }
-    for(i = 0; i < size; i++){
-        for(j = 0; j < size; j++){
-            L[i][j] = 0;
-        }
-    }
-
-    double beta;
-    beta = M_PI / 4;
+    double beta = M_PI / 4;
 
     size--;
     L[0][0]       = cos(beta);
@@ -78,38 +80,20 @@ build_L(int m){
     return L;
 }
 
-double **
-build_K(int m){
-    int size = 2*m;
-    double **K = malloc(size * sizeof(*K));
+/* Allocate matrix of size x size, and initialize it with all 0 */
+void
+nullMatrix(int size, double **matrix){
+    matrix = malloc(size * sizeof(*L));
     int i, j;
 
     for(i = 0; i < size; i++){
-        K[i] = malloc(size * sizeof(*K[i]));
+        matrix[i] = malloc(size * sizeof(*matrix[i]));
     }
-
     for(i = 0; i < size; i++){
         for(j = 0; j < size; j++){
-            K[i][j] = 0;
+            matrix[i][j] = 0;
         }
     }
-
-    double alfa;
-    alfa = M_PI / 4;
-
-    double a = cos(alfa);
-    double b = sin(alfa);
-    double c = -b;
-
-    size--;
-    while(size > 0){
-        K[size][size]     = a;
-        K[size-1][size-1] = a;
-        K[size][size-1]   = c;
-        K[size-1][size]   = b;
-        size -= 2;
-    }
-    return K;
 }
 
 /* naive algorithm: O(n^3) */
@@ -148,4 +132,13 @@ printMatrix(int size, double **matrix){
         }
         putchar('\n');
     }
+}
+
+void
+freeMatrix(int size, double **matrix){
+    int i;
+    for(i = 0; i < size; i++){
+        free(matrix[i]);
+    }
+    free(matrix);
 }

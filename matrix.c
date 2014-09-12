@@ -16,14 +16,17 @@ int main(int argc, char *argv[]){
     }
     int m;
     sscanf(argv[1], "%d", &m);
+    int size = 2 * m;
+
     double **A;
     double **K = build_K(m);
     double **L = build_L(m);
-    A = matrixProduct(2*m, L, K);
-    printMatrix(2*m, A);
-    freeMatrix(2*m, K);
-    freeMatrix(2*m, L);
-    freeMatrix(2*m, A);
+    A = matrixProduct(size, L, K);
+    printMatrix(size, A);
+
+    freeMatrix(size, K);
+    freeMatrix(size, L);
+    freeMatrix(size, A);
 
     return EXIT_SUCCESS;
 }
@@ -136,10 +139,12 @@ matrixProduct(int size, double **m1, double **m2){
 void
 printMatrix(int size, double **matrix){
     int i, j;
+    char s[10];
 
     for(i = 0; i < size; i++){
         for(j = 0; j < size; j++){
-            printf("%f  ", matrix[i][j]);
+            sprintf(s, "%5f", matrix[i][j]);
+            printf("%.8s ", s);
         }
         putchar('\n');
     }

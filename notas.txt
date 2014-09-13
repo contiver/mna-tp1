@@ -1,0 +1,24 @@
+Método de las potencias (power iterations 7.3)
+Requerimiento:
+* La matriz debe tener un autovalor estrictamente mayor en magnitud que todos
+   los otros (autovalor dominante). ==> No se cumple en nuestro caso
+
+Método de las potencias inversas (inverse iterations)
+Requerimiento:
+* La matriz debe tener un autovalor estrictamente menor en magnitud que todos
+   los otros (autovalor dominado). ==> No se cumple en nuestro caso
+
+Orthogonal Iteration (7.3.2)
+Es una generalización del método de las potencias... no se si nos sirve o no,
+no me queda claro si tiene las mismas restricciones...
+
+QR Iteration (7.3.3)
+Requerimiento:
+* Todos los autovalores distintos en magnitud ==> No se cumple en nuestro caso
+
+Francis QR Step (7.5.1)
+Parece que es la posta de los métodos, pero requiere varios procedimientos
+antes (upper Hessenberg matrix, Householder matrices...)
+"Reducing A to the Hessenberg form using Algorithm 7.4.2 and then iterating
+with algorithm 7.5.1 to produce the real Schur form is the standard means by
+which the dense unsymmetric eigenproblem is solved"

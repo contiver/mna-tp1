@@ -12,7 +12,10 @@ Matrix newMatrix(void);
 /* free memory used by Matrix ADT */
 void freeMatrix(Matrix mat);
 
-/* Returns matrix multiplication between m1 and m2 */
+/* Returns a deep copy of mat */
+Matrix copyMatrix(Matrix mat);
+
+/* Returns the matrix multiplication between m1 and m2 */
 Matrix matrixMult(Matrix m1, Matrix m2);
 
 /* Returns the L matrix of the Ising model
@@ -26,15 +29,20 @@ Matrix build_L(int size);
 Matrix build_K(int size);
 
 /* Returns a new Matrix by transposing the elements of the input */
-Matrix transpose(Matrix M);
+Matrix transpose(Matrix mat);
 
+/* Returns a Matrix (vector) containing the eigenvector for the
+ * dominant eigenvalue */
 Matrix powerIteration(Matrix A);
 
 void printMatrix(Matrix mat);
 
 void printEigenvector(Matrix mat);
 
-int cols(Matrix M);
-int rows(Matrix M);
+/* Return column size of mat */
+int cols(Matrix mat);
+
+/* Return row size of mat */
+int rows(Matrix mat);
 
 #endif

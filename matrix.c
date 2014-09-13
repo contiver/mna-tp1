@@ -199,6 +199,27 @@ powerIteration(Matrix A){
     return p;
 }
 
+Matrix
+copyMatrix(Matrix mat){
+    Matrix ret = newMatrix();
+    ret->cols = mat->cols;
+    ret->rows = mat->rows;
+    ret->matrix = malloc(mat->rows * sizeof(*(ret->matrix)));
+
+    int i, j;
+    for(i = 0; i < mat->rows; i++){
+        ret->matrix[i] = malloc(mat->cols * sizeof(*(ret->matrix[i])));
+    }
+
+    for(i = 0; i < mat->rows; i++){
+        for(j = 0; j < mat->cols; j++){
+            ret->matrix[i][j] = mat->matrix[i][j];
+        }
+    }
+
+    return ret;
+}
+
 static double
 norm2(Matrix vec){
     if(vec->cols != 1){

@@ -165,6 +165,12 @@ freeMatrix(Matrix mat){
     free(mat);
 }
 
+/* Requires that:
+ * A has an eigenvalue that is strictly greater in magnitude than its other
+ * eigenvalues
+ * The starting vector p has a nonzero component in the direction of an
+ * eigenvector associated with the dominant eigenvalue.
+ */
 Matrix
 powerIteration(Matrix A){
     Matrix p = nullMatrix(A->rows, 1);

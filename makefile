@@ -1,6 +1,8 @@
 CC = gcc
 FLAGS = -Wall -O3 -lm
 
+all: default clean
+
 default: main.o matrix.o
 	$(CC) $(FLAGS) -o A_matrix main.o matrix.o
 

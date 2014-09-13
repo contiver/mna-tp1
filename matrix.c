@@ -1,41 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "matrix.h"
 
-double **matrixProduct(int n, int m, int p, double **m1, double **m2);
-double **build_L(int m);
-double **build_K(int m);
-double **nullMatrix(int size);
-void printMatrix(int size, double **matrix);
-void freeMatrix(int size, double **matrix);
+struct Matrix{
+    double **matrix;
+    int rows;
+    int cols;
+};
 
-int
-main(int argc, char *argv[]){
-    if (argc < 2){
-        printf("Please supply the m (integer) value as a "
-               "parameter to the program\n");
-        return EXIT_SUCCESS;
-    }
-    int m;
-    sscanf(argv[1], "%d", &m);
-    int size = 2 * m;
-
-    double **A;
-    double **K = build_K(size);
-    double **L = build_L(size);
-    A = matrixProduct(size, size, size, L, K);
-    printMatrix(size, A);
-
-    freeMatrix(size, K);
-    freeMatrix(size, L);
-    freeMatrix(size, A);
-
-    return EXIT_SUCCESS;
+Matrix
+newMatrix(){
+    Matrix ret = mallocTest(sizeof(Matrix));
+    ret->matrix = NULL;
+    ret->rows = 0;
+    ret->cols = 0;
+    return ret;
 }
 
-double **
+Matrix
 build_K(int size){
-    double **K = nullMatrix(size);
+    Matrix K = nullMatrix(size, size);
+    double **mat = K->matrix;
 
     double alfa = M_PI / 4;
 
@@ -45,69 +31,85 @@ build_K(int size){
 
     size--;
     while(size > 0){
-        K[size][size]     = a;
-        K[size-1][size-1] = a;
-        K[size][size-1]   = c;
-        K[size-1][size]   = b;
+        mat[size][size]     = a;
+        mat[size-1][size-1] = a;
+        mat[size][size-1]   = c;
+        mat[size-1][size]   = b;
         size -= 2;
     }
     return K;
 }
 
-double **
+Matrix
 build_L(int size){
-    double **L = nullMatrix(size);
+    Matrix L = nullMatrix(size, size);
+    double **mat = L->matrix;
 
     double beta = M_PI / 4;
 
     size--;
-    L[0][0]       = cos(beta);
-    L[0][size]    = -sin(beta);
-    L[size][0]    = sin(beta);
-    L[size][size] = cos(beta);
+    mat[0][0]       = cos(beta);
+    mat[0][size]    = -sin(beta);
+    mat[size][0]    = sin(beta);
+    mat[size][size] = cos(beta);
 
     double a = cos(beta);
     double b = sin(beta);
     double c = -b;
 
     while(size > 2){
-        L[size-1][size-1] = a;
-        L[size-1][size-2] = c;
-        L[size-2][size-1] = b;
-        L[size-2][size-2] = a;
+        mat[size-1][size-1] = a;
+        mat[size-1][size-2] = c;
+        mat[size-2][size-1] = b;
+        mat[size-2][size-2] = a;
         size -= 2;
     }
     return L;
 }
 
-/* Allocate matrix of size x size, and initialize it with all 0 */
-double **
-nullMatrix(int size){
-    double **matrix = malloc(size * sizeof(*matrix));
-    int i, j;
+Matrix
+nullMatrix(int rows, int cols){
+    double **matrix = callocTest(rows, sizeof(*matrix));
+    int i;
 
-    for(i = 0; i < size; i++){
-        matrix[i] = malloc(size * sizeof(*matrix[i]));
+    for(i = 0; i < rows; i++){
+        matrix[i] = callocTest(cols, sizeof(*matrix[i]));
     }
-    for(i = 0; i < size; i++){
-        for(j = 0; j < size; j++){
-            matrix[i][j] = 0;
-        }
-    }
-    return matrix;
+
+    Matrix answ = newMatrix();
+    answ->rows = rows;
+    answ->cols = cols;
+    answ->matrix = matrix;
+
+    return answ;
 }
 
-/* naive algorithm: O(n^3) */
-double **
-matrixProduct(int n, int m, int p, double **m1, double **m2){
-    double **answ = malloc(n * sizeof(*answ));
+/* naive algorithm: O(n^3)
+ *
+ * Given a matrices m1 of size n x m, and m2 of size m x p, return the
+ * multiplication of both
+ */
+Matrix
+matrixMult(Matrix mat1, Matrix mat2){
+    if(mat1->cols != mat2->rows){
+        char s[70];
+        sprintf(s,"Cannot multiply %d x %d matrix by a %d x %d matrix",
+                mat1->rows, mat1->cols, mat2->rows, mat1->cols);
+        perror(s);
+        exit(EXIT_FAILURE);
+    }
+    int n = mat1->rows;
+    int m = mat1->cols;
+    int p = mat2->cols;
+    double **m1 = mat1->matrix;
+    double **m2 = mat2->matrix;
+    double **answ = mallocTest(n * sizeof(*answ));
+    double value;
     int i, j, k;
 
-    for(i = 0; i < p; i++){
-        answ[i] = malloc(p * sizeof(*answ[i]));
+    for(i = 0; i < n; i++){
+        answ[i] = mallocTest(p * sizeof(*answ[i]));
     }
-
-    double value;
 
     for(i = 0; i < n; i++){
         for(j = 0; j < p; j++){
@@ -118,17 +120,22 @@ matrixProduct(int n, int m, int p, double **m1, double **m2){
             answ[i][j] = value;
         }
     }
-    return answ;
+
+    Matrix ret = newMatrix();
+    ret->matrix = answ;
+    ret->rows = n;
+    ret->cols = p;
+    return ret;
 }
 
 void
-printMatrix(int size, double **matrix){
+printMatrix(Matrix mat){
     int i, j;
     char s[10];
 
-    for(i = 0; i < size; i++){
-        for(j = 0; j < size; j++){
-            sprintf(s, "%5f", matrix[i][j]);
+    for(i = 0; i < mat->rows; i++){
+        for(j = 0; j < mat->cols; j++){
+            sprintf(s, "%5f", mat->matrix[i][j]);
             printf("%.8s ", s);
         }
         putchar('\n');
@@ -136,23 +143,103 @@ printMatrix(int size, double **matrix){
 }
 
 void
-freeMatrix(int size, double **matrix){
+printEigenvector(Matrix mat){
+    printf("Eigenvector v1:\n");
+    printf("[%f", mat->matrix[0][0]);
     int i;
-    for(i = 0; i < size; i++){
-        free(matrix[i]);
+    for(i = 1; i < mat->rows; i++){
+        printf(" %f", mat->matrix[i][0]);
     }
-    free(matrix);
+    printf("]\n");
 }
 
 void
-powerIteration(int size){
-    double *p = malloc(size * sizeof(*p));
+freeMatrix(Matrix mat){
+    if(mat->matrix != NULL){
+        int i;
+        for(i = 0; i < mat->rows; i++){
+            free(mat->matrix[i]);
+        }
+        free(mat->matrix);
+    }
+    free(mat);
 }
 
-/*
-typedef struct{
-    double **matrix;
-    int rows;
-    int cols;
-} Matrix;
-*/
+Matrix
+powerIteration(Matrix A){
+    Matrix p = nullMatrix(A->rows, 1);
+    double norm;
+    int i, j;
+
+    for(i = 0; i < A->rows; i++){
+        p->matrix[i] = mallocTest(sizeof(p->matrix[i]));
+        p->matrix[i][0] = 1.0;
+    }
+
+    /* cableadas 100 iteraciones, modificar */
+    for(i = 0; i < 200; i++){
+        p = matrixMult(A, p);
+        norm = norm2(p);
+        for(j = 0; j < A->rows; j++){
+            p->matrix[j][0] /= norm;
+        }
+    }
+    return p;
+}
+
+double
+norm2(Matrix vec){
+    if(vec->cols != 1){
+        perror("Bad usage of norm2 function. Aborting...");
+        exit(EXIT_FAILURE);
+    }
+    double val = 0;
+    int i;
+
+    for(i = 0; i < vec->rows; i++){
+        val += vec->matrix[i][0] * vec->matrix[i][0];
+    }
+
+    return sqrt(val);
+}
+
+/* Wrapper for checking if malloc returned NULL */
+void*
+mallocTest(size_t size){
+    void* mem = malloc(size);
+    if(mem == NULL){
+        perror("Couldn't allocate memory upon malloc call. Aborting...");
+        exit(EXIT_FAILURE);
+    }
+    return mem;
+}
+
+/* Wrapper for checking if malloc returned NULL */
+void*
+callocTest(size_t nmemb, size_t size){
+    void* mem = calloc(nmemb, size);
+    if(mem == NULL){
+        perror("Couldn't allocate memory upon calloc call. Aborting...");
+        exit(EXIT_FAILURE);
+    }
+    return mem;
+}
+
+double**
+traspose(int rows, int cols, double **matrix){
+    double **answ = mallocTest(cols * sizeof(*answ));
+    int i, j;
+
+    for(i = 0; i < cols; i++){
+        answ[i] = mallocTest(rows * sizeof(*answ[i]));
+    }
+
+    for(i = 0; i < cols; i++){
+        for(j = 0; j < rows; j++){
+            answ[i][j] = matrix[j][i];
+        }
+    }
+
+    return answ;
+}
+

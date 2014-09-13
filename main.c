@@ -19,13 +19,8 @@ main(int argc, char *argv[]){
     printf("Matrix A for m = %d:\n", m);
     printMatrix(A);
 
-    Matrix p = powerIteration(A);
-    printEigenvector(p);
-
-    /*
-    double pt = transpose(p);
-    matrixMult(size, si)
-    */
+    //Matrix p = powerIteration(A);
+    //printEigenvector(p);
 
     freeMatrix(K);
     freeMatrix(L);

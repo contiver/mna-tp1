@@ -3,6 +3,15 @@
 
 typedef struct Matrix *Matrix;
 
+/* Allocate matrix of rows x cols, and initialize it with all 0 */
+Matrix nullMatrix(int rows, int cols);
+
+/* Allocates a Matrix, but doesn't initialize it */
+Matrix newMatrix(void);
+
+/* free memory used by Matrix ADT */
+void freeMatrix(Matrix mat);
+
 /* Returns matrix multiplication between m1 and m2 */
 Matrix matrixMult(Matrix m1, Matrix m2);
 
@@ -16,26 +25,16 @@ Matrix build_L(int size);
  */
 Matrix build_K(int size);
 
-/* Allocate matrix of rows x cols, and initialize it with all 0 */
-Matrix nullMatrix(int rows, int cols);
+/* Returns a new Matrix by transposing the elements of the input */
+Matrix transpose(Matrix M);
 
-/* Allocates a Matrix, but doesn't initialize it */
-Matrix newMatrix(void);
-
-/* free memory used by Matrix ADT */
-void freeMatrix(Matrix mat);
+Matrix powerIteration(Matrix A);
 
 void printMatrix(Matrix mat);
 
 void printEigenvector(Matrix mat);
 
-
-double norm2(Matrix vec);
-
-Matrix powerIteration(Matrix A);
-
-void* mallocTest(size_t size);
-
-void* callocTest(size_t nmemb, size_t size);
+int cols(Matrix M);
+int rows(Matrix M);
 
 #endif

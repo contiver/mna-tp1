@@ -9,6 +9,12 @@ struct Matrix{
     int cols;
 };
 
+/* local functions */
+static double norm2(Matrix vec);
+static void* mallocTest(size_t size);
+static void* callocTest(size_t nmemb, size_t size);
+
+
 Matrix
 newMatrix(){
     Matrix ret = mallocTest(sizeof(Matrix));
@@ -193,7 +199,7 @@ powerIteration(Matrix A){
     return p;
 }
 
-double
+static double
 norm2(Matrix vec){
     if(vec->cols != 1){
         perror("Bad usage of norm2 function. Aborting...");
@@ -210,7 +216,7 @@ norm2(Matrix vec){
 }
 
 /* Wrapper for checking if malloc returned NULL */
-void*
+static void*
 mallocTest(size_t size){
     void* mem = malloc(size);
     if(mem == NULL){
@@ -221,7 +227,7 @@ mallocTest(size_t size){
 }
 
 /* Wrapper for checking if malloc returned NULL */
-void*
+static void*
 callocTest(size_t nmemb, size_t size){
     void* mem = calloc(nmemb, size);
     if(mem == NULL){
@@ -231,21 +237,34 @@ callocTest(size_t nmemb, size_t size){
     return mem;
 }
 
-double**
-traspose(int rows, int cols, double **matrix){
-    double **answ = mallocTest(cols * sizeof(*answ));
+Matrix
+transpose(Matrix M){
+    double **answ = mallocTest(M->cols * sizeof(*answ));
     int i, j;
 
-    for(i = 0; i < cols; i++){
-        answ[i] = mallocTest(rows * sizeof(*answ[i]));
+    for(i = 0; i < M->cols; i++){
+        answ[i] = mallocTest(M->rows * sizeof(*answ[i]));
     }
 
-    for(i = 0; i < cols; i++){
-        for(j = 0; j < rows; j++){
-            answ[i][j] = matrix[j][i];
+    for(i = 0; i < M->cols; i++){
+        for(j = 0; j < M->rows; j++){
+            answ[i][j] = M->matrix[j][i];
         }
     }
 
-    return answ;
+    Matrix ret = newMatrix();
+    ret->matrix = answ;
+    ret->rows = M->cols;
+    ret->cols = M->rows;
+    return ret;
 }
 
+int
+cols(Matrix M){
+    return M->cols;
+}
+
+int
+rows(Matrix M){
+    return M->rows;
+}

@@ -1,77 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 #include "matrix.h"
 
 #define PI 3.14159265358979323846264338327
 
-struct Matrix{
-    double **elem;
-    int rows;
-    int cols;
-};
+typedef struct MatrixCDT{
+    double  **elem;
+    int       rows;
+    int       cols;
+} MatrixCDT;
 
-/* local functions */
 static double norm2(Matrix vec);
-static void* mallocTest(size_t size);
-static void* callocTest(size_t nmemb, size_t size);
 
 /* Allocates a Matrix or rows x cols size, but doesn't initialize it */
 static Matrix newMatrix(int rows, int cols);
 
 
 Matrix
-build_K(int size){
-    Matrix K = nullMatrix(size, size);
-    double **mat = K->elem;
-
-    double alfa = PI / 4;
-
-    double a = cos(alfa);
-    double b = sin(alfa);
-    double c = -b;
-
-    size--;
-    while(size > 0){
-        mat[size][size]     = a;
-        mat[size-1][size-1] = a;
-        mat[size][size-1]   = c;
-        mat[size-1][size]   = b;
-        size -= 2;
-    }
-    return K;
-}
-
-Matrix
-build_L(int size){
-    Matrix L = nullMatrix(size, size);
-    double **mat = L->elem;
-
-    double beta = PI / 4;
-
-    size--;
-    mat[0][0]       = cos(beta);
-    mat[0][size]    = -sin(beta);
-    mat[size][0]    = sin(beta);
-    mat[size][size] = cos(beta);
-
-    double a = cos(beta);
-    double b = sin(beta);
-    double c = -b;
-
-    while(size > 2){
-        mat[size-1][size-1] = a;
-        mat[size-1][size-2] = c;
-        mat[size-2][size-1] = b;
-        mat[size-2][size-2] = a;
-        size -= 2;
-    }
-    return L;
-}
-
-Matrix
 nullMatrix(int rows, int cols){
-    Matrix ret   = malloc(sizeof(Matrix));
+    Matrix ret   = malloc(sizeof(MatrixCDT));
     ret->elem    = malloc(rows * sizeof(*(ret->elem)));
     ret->elem[0] = calloc(sizeof(*(ret->elem[0])), rows * cols);
 
@@ -87,7 +36,7 @@ nullMatrix(int rows, int cols){
 
 static Matrix
 newMatrix(int rows, int cols){
-    Matrix ret   = malloc(sizeof(Matrix));
+    Matrix ret   = malloc(sizeof(MatrixCDT));
     ret->elem    = malloc(rows * sizeof(*(ret->elem)));
     ret->elem[0] = malloc(rows * cols * sizeof(*(ret->elem[0])));
 
@@ -99,6 +48,53 @@ newMatrix(int rows, int cols){
     ret->cols = cols;
 
     return ret;
+}
+
+Matrix
+build_K(int size){
+    Matrix K = nullMatrix(size, size);
+
+    double alfa = PI / 4;
+
+    double a = cos(alfa);
+    double b = sin(alfa);
+    double c = -b;
+
+    size--;
+    while(size > 0){
+        K->elem[size][size]     = a;
+        K->elem[size-1][size-1] = a;
+        K->elem[size][size-1]   = c;
+        K->elem[size-1][size]   = b;
+        size -= 2;
+    }
+    return K;
+}
+
+Matrix
+build_L(int size){
+    Matrix L = nullMatrix(size, size);
+
+    double beta = PI / 4;
+
+    size--;
+    L->elem[0][0]       = cos(beta);
+    L->elem[0][size]    = -sin(beta);
+    L->elem[size][0]    = sin(beta);
+    L->elem[size][size] = cos(beta);
+
+    double a = cos(beta);
+    double b = sin(beta);
+    double c = -b;
+
+    while(size > 2){
+        L->elem[size-1][size-1] = a;
+        L->elem[size-1][size-2] = c;
+        L->elem[size-2][size-1] = b;
+        L->elem[size-2][size-2] = a;
+        size -= 2;
+    }
+    return L;
 }
 
 /* naive algorithm: O(n^3)
@@ -190,7 +186,7 @@ powerIteration(Matrix A){
     double norm;
 
     for(int i = 0; i < A->rows; i++){
-        p->elem[i] = mallocTest(sizeof(p->elem[i]));
+        p->elem[i] = malloc(sizeof(p->elem[i]));
         p->elem[i][0] = 1.0;
     }
 
@@ -231,28 +227,6 @@ norm2(Matrix vec){
     return sqrt(val);
 }
 
-/* Wrapper for checking if malloc returned NULL */
-static void*
-mallocTest(size_t size){
-    void* mem = malloc(size);
-    if(mem == NULL){
-        perror("Couldn't allocate memory upon malloc call. Aborting...");
-        exit(EXIT_FAILURE);
-    }
-    return mem;
-}
-
-/* Wrapper for checking if malloc returned NULL */
-static void*
-callocTest(size_t nmemb, size_t size){
-    void* mem = calloc(nmemb, size);
-    if(mem == NULL){
-        perror("Couldn't allocate memory upon calloc call. Aborting...");
-        exit(EXIT_FAILURE);
-    }
-    return mem;
-}
-
 Matrix
 transpose(Matrix mat){
     Matrix ret = newMatrix(mat->cols, mat->rows);
@@ -265,7 +239,7 @@ transpose(Matrix mat){
 }
 
 Matrix
-identity(int size){
+identityMatrix(int size){
     Matrix ret = nullMatrix(size, size);
     for(int i = 0; i < size; i++){
         ret->elem[i][i] = 1.0;
@@ -288,45 +262,41 @@ rows(Matrix M){
 /* Compressed sparse column matrix, a.k.a
  * Compressed column storage */
 
-struct CCSMatrix {
-    double *val;
-    int *row_index;
-    int *col_ptr;
-    int nnz;
-    int rows;
-    int cols;
-};
+typedef struct CCSMatrixCDT {
+    int     *row_index;
+    int     *col_ptr;
+    double  *val;
+    int      nnz;
+    int      rows;
+    int      cols;
+} CCSMatrixCDT;
 
 CCSMatrix
 identityCCSMatrix(int size){
-    CCSMatrix ret  = malloc(sizeof(CCSMatrix));
-    ret->val       = malloc(size * sizeof(*(ret->val)));
-    ret->row_index = malloc(size * sizeof(*(ret->row_index)));
-    ret->col_ptr   = malloc((size+1) * sizeof(*(ret->col_ptr)));
+    CCSMatrix ret  = malloc(sizeof(CCSMatrixCDT));
+    ret->val       = malloc(size * sizeof (ret->val[0]));
+    ret->row_index = malloc(size * sizeof (ret->row_index[0]));
+    ret->col_ptr   = malloc((size+1) * sizeof (ret->col_ptr[0]));
     ret->nnz       = size;
     ret->rows      = size;
     ret->cols      = size;
 
-    int i;
-
-    for(i = 0; i < size; i++){
-        ret->val[i]       = 1.0;
+    for(int i = 0; i < size; i++){
         ret->row_index[i] = i;
         ret->col_ptr[i]   = i;
+        ret->val[i]       = 1.0;
     }
-    ret->col_ptr[i] = size;
+    ret->col_ptr[size] = size;
 
     return ret;
 }
 
 void
 freeCCSMatrix(CCSMatrix mat){
-    printf("mat pointer: %d", mat);
-
-    // free(mat->val);
-    //free(mat->row_index);
-    //free(mat->col_ptr);
-    //free(mat);
+    free(mat->val);
+    free(mat->row_index);
+    free(mat->col_ptr);
+    free(mat);
 }
 
 void
@@ -369,6 +339,40 @@ ccsToMatrix(CCSMatrix ccs){
             j++;
         }
     }
+    return ret;
+}
+
+CCSMatrix
+matrixToCCS(Matrix mat){
+    CCSMatrix ret  = malloc(sizeof(CCSMatrixCDT));
+    int memSize    = (mat->cols * mat->rows) * 0.1 + 2;
+    ret->val       = malloc(memSize * sizeof(ret->val[0]));
+    ret->row_index = malloc(memSize * sizeof(ret->row_index[0]));
+    ret->col_ptr   = malloc((mat->cols + 1) * sizeof(ret->col_ptr[0]));
+    ret->cols      = mat->cols;
+    ret->rows      = mat->rows;
+
+    for(int col = 0; col < mat->cols; col++){
+        bool columnStarterNotFound = true;
+        for(int row = 0; row < mat->rows; row++){
+            if(mat->elem[row][col] != 0.0){
+                if(ret->nnz == memSize){
+                    memSize *= 1.2;     // Arbitrary incremental value
+                    ret->val = realloc(ret->val, memSize * sizeof(ret->val[0]));
+                    ret->row_index = realloc(ret->row_index, memSize * sizeof(ret->row_index[0]));
+                }
+                ret->val[ret->nnz] = mat->elem[row][col];
+                ret->row_index[ret->nnz] = row;
+                if(columnStarterNotFound){
+                    ret->col_ptr[col] = ret->nnz;
+                }
+                columnStarterNotFound = false;
+                ret->nnz++;
+            }
+        }
+    }
+    ret->col_ptr[ret->cols] = ret->nnz;
+
     return ret;
 }
 

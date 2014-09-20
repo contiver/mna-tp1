@@ -12,21 +12,21 @@ main(int argc, char *argv[]){
     int m;
     sscanf(argv[1], "%d", &m);
 
+    Matrix idMat = identityMatrix(m);
+    CCSMatrix id = matrixToCCS(idMat);
+    printCCS(id);
+    Matrix original = ccsToMatrix(id);
+    printMatrix(original);
+    /*
     CCSMatrix id = identityCCSMatrix(m);
-
     printCCS(id);
 
     Matrix idMat = ccsToMatrix(id);
     printMatrix(idMat);
-
-    //Matrix p = powerIteration(A);
-    //printEigenvector(p);
+    */
 
     freeMatrix(idMat);
-
-
-    // TODO: REVISAR ESTE FREE DEL CCS
-    freeCCSMatrix(id);
+    //freeCCSMatrix(id);
 
     return EXIT_SUCCESS;
 }

@@ -22,3 +22,53 @@ antes (upper Hessenberg matrix, Householder matrices...)
 "Reducing A to the Hessenberg form using Algorithm 7.4.2 and then iterating
 with algorithm 7.5.1 to produce the real Schur form is the standard means by
 which the dense unsymmetric eigenproblem is solved"
+
+
+314         for(i = 0; i < size; i++){
+    8: ret->val[0] = 4.89519624755812e-270
+    7: ret->row_index[0] = 0
+    6: ret->col_ptr[0] = 0
+    4: ret->col_ptr = (int *) 0x804b058
+    3: ret->row_index = (int *) 0x804b040
+    2: ret->val = (double *) 0x804b018
+    1: ret = (CCSMatrix) 0x804b008
+    (gdb) step
+    315             ret->val[i]       = 1.0;
+    8: ret->val[0] = 4.89519624755812e-270
+    7: ret->row_index[0] = 0
+    6: ret->col_ptr[0] = 0
+    4: ret->col_ptr = (int *) 0x804b058
+    3: ret->row_index = (int *) 0x804b040
+    2: ret->val = (double *) 0x804b018
+    1: ret = (CCSMatrix) 0x804b008
+    (gdb) step
+    316             ret->row_index[i] = i;
+    8: ret->val[0] = 1
+    7: ret->row_index[0] = <error: Cannot access memory at address 0x0>
+    6: ret->col_ptr[0] = <error: Cannot access memory at address 0x3ff00000>
+    4: ret->col_ptr = (int *) 0x3ff00000
+    3: ret->row_index = (int *) 0x0
+    2: ret->val = (double *) 0x804b018
+    1: ret = (CCSMatrix) 0x804b008
+    (gdb) print ret->val[1]
+    $1 = 0
+    (gdb) print ret->val[2]
+    $2 = 0
+    (gdb) print ret->val[3]
+    $3 = 0
+    (gdb) print ret->val[4]
+    $4 = 5.3049894774131808e-313
+    (gdb) print ret->val[5]
+    $5 = 0
+    (gdb) print ret->val[6]
+    $6 = 0
+    (gdb) print ret->val[7]
+    $7 = 5.3049894774131808e-313
+    (gdb) print ret->val[8]
+    $8 = 0
+    (gdb) print ret->val[9]
+    $9 = 0
+    (gdb) print ret->val[10]
+    $10 = 2.8660736150672451e-309
+    (gdb) quit
+}

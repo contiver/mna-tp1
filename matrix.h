@@ -1,7 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-typedef struct Matrix *Matrix;
+typedef struct MatrixCDT *Matrix;
 
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
@@ -28,6 +28,8 @@ Matrix build_K(int size);
 /* Returns a new Matrix by transposing the elements of the input */
 Matrix transpose(Matrix mat);
 
+Matrix identityMatrix(int size);
+
 /* Returns a Matrix (vector) containing the eigenvector for the
  * dominant eigenvalue */
 Matrix powerIteration(Matrix A);
@@ -43,14 +45,18 @@ int cols(Matrix mat);
 int rows(Matrix mat);
 
 /* ========================================================================= */
+/* Compressed sparse column matrix, a.k.a Compressed column storage. Provides
+ * efficient storage for sparse matrices.*/
 
-typedef struct CCSMatrix *CCSMatrix;
+typedef struct CCSMatrixCDT *CCSMatrix;
 
 CCSMatrix identityCCSMatrix(int size);
 
 void freeCCSMatrix(CCSMatrix mat);
 
 Matrix ccsToMatrix(CCSMatrix ccs);
+
+CCSMatrix matrixToCCS(Matrix mat);
 
 void printCCS(CCSMatrix ccs);
     

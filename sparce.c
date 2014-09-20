@@ -11,27 +11,22 @@ main(int argc, char *argv[]){
     }
     int m;
     sscanf(argv[1], "%d", &m);
-    int size = 2 * m;
 
-    Matrix K = build_K(size);
-    Matrix L = build_L(size);
-    Matrix A = matrixMult(L, K);
+    CCSMatrix id = identityCCSMatrix(m);
 
-    printf("Matrix K for m = %d:\n", m);
-    printMatrix(K);
+    printCCS(id);
 
-    printf("\nMatrix L for m = %d:\n", m);
-    printMatrix(L);
-
-    printf("\nMatrix A for m = %d:\n", m);
-    printMatrix(A);
+    Matrix idMat = ccsToMatrix(id);
+    printMatrix(idMat);
 
     //Matrix p = powerIteration(A);
     //printEigenvector(p);
 
-    freeMatrix(K);
-    freeMatrix(L);
-    freeMatrix(A);
+    freeMatrix(idMat);
+
+
+    // TODO: REVISAR ESTE FREE DEL CCS
+    freeCCSMatrix(id);
 
     return EXIT_SUCCESS;
 }

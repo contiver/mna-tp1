@@ -6,9 +6,6 @@ typedef struct Matrix *Matrix;
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
 
-/* Allocates a Matrix, but doesn't initialize it */
-Matrix newMatrix(void);
-
 /* free memory used by Matrix ADT */
 void freeMatrix(Matrix mat);
 
@@ -45,4 +42,16 @@ int cols(Matrix mat);
 /* Return row size of mat */
 int rows(Matrix mat);
 
+/* ========================================================================= */
+
+typedef struct CCSMatrix *CCSMatrix;
+
+CCSMatrix identityCCSMatrix(int size);
+
+void freeCCSMatrix(CCSMatrix mat);
+
+Matrix ccsToMatrix(CCSMatrix ccs);
+
+void printCCS(CCSMatrix ccs);
+    
 #endif

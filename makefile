@@ -1,5 +1,5 @@
 CC = gcc
-FLAGS = -Wall -O3 -lm
+FLAGS = -Wall -O3 -lm -std=c11
 
 all: default clean
 

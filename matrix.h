@@ -1,7 +1,27 @@
 #ifndef MATRIX_H
 #define MATRIX_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct MatrixCDT *Matrix;
+
+typedef struct MatrixCDT{
+    double  **elem;
+    int       rows;
+    int       cols;
+} MatrixCDT;
+
+typedef struct CCSMatrixCDT *CCSMatrix;
+
+typedef struct CCSMatrixCDT {
+    int     *row_index;
+    int     *col_ptr;
+    double  *val;
+    int      nnz;
+    int      rows;
+    int      cols;
+} CCSMatrixCDT;
 
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
@@ -47,8 +67,6 @@ int rows(Matrix mat);
 /* ========================================================================= */
 /* Compressed sparse column matrix, a.k.a Compressed column storage. Provides
  * efficient storage for sparse matrices.*/
-
-typedef struct CCSMatrixCDT *CCSMatrix;
 
 CCSMatrix identityCCSMatrix(int size);
 

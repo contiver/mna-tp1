@@ -81,6 +81,10 @@ Matrix ccsToMatrix(CCSMatrix ccs);
 
 CCSMatrix matrixToCCS(Matrix mat);
 
+CCSMatrix ccsMult(CCSMatrix ccs1, CCSMatrix ccs2);
+
+double ccsValueAt(int row, int col, CCSMatrix ccs);
+
 void printCCS(CCSMatrix ccs);
     
 #endif

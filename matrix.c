@@ -1,7 +1,5 @@
-#include <math.h>
 #include "matrix.h"
 
-#define PI 3.14159265358979323846264338327
 
 static double norm2(Matrix vec);
 

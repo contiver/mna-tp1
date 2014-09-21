@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
+
+#define PI 3.14159265358979323846264338327
 
 typedef struct MatrixCDT *Matrix;
 
@@ -69,6 +72,8 @@ int rows(Matrix mat);
  * efficient storage for sparse matrices.*/
 
 CCSMatrix identityCCSMatrix(int size);
+
+CCSMatrix build_CCS_K(int size);
 
 void freeCCSMatrix(CCSMatrix mat);
 

@@ -26,8 +26,8 @@ main(int argc, char *argv[]){
     */
 
     freeMatrix(idMat);
-    //TODO ARREGLAR EL FREE DE CCSMatrix !
-    //freeCCSMatrix(id);
+    freeMatrix(original);
+    freeCCSMatrix(id);
 
     return EXIT_SUCCESS;
 }

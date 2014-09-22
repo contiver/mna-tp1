@@ -25,14 +25,13 @@ identityCCSMatrix(int size){
 
 static CCSMatrix
 newCCSMatrix(int nnz, int rows, int cols){
-    CCSMatrix ret  = malloc(sizeof(CCSMatrixCDT));
-    ret->val       = malloc(nnz * sizeof (ret->val[0]));
-    ret->row_index = malloc(nnz * sizeof (ret->row_index[0]));
-    ret->col_ptr   = malloc((cols +1) * sizeof (ret->col_ptr[0]));
-    ret->nnz       = nnz;
-    ret->rows      = rows;
-    ret->cols      = cols;
-
+    CCSMatrix ret      = malloc(sizeof(CCSMatrixCDT));
+    ret->val           = malloc(nnz * sizeof (ret->val[0]));
+    ret->row_index     = malloc(nnz * sizeof (ret->row_index[0]));
+    ret->col_ptr       = malloc((cols +1) * sizeof (ret->col_ptr[0]));
+    ret->nnz           = nnz;
+    ret->rows          = rows;
+    ret->cols          = cols;
     ret->col_ptr[cols] = nnz;
 
     return ret;
@@ -73,8 +72,57 @@ build_CCS_K(int size){
 }
 
 CCSMatrix
+build_CCS_L(int size){
+    CCSMatrix L  = newCCSMatrix(4 + 4*((size/2)-1), size, size);
+
+    double beta = PI / 4;
+
+    double a = cos(beta);
+    double b = sin(beta);
+    double c = -b;
+
+    L->val[0]              = a;
+    L->row_index[0]        = 0;
+    L->col_ptr[0]          = 0;
+
+    L->val[1]              = b;
+    L->row_index[1]        = L->rows - 1;
+
+    L->val[L->nnz-2]       = c;
+    L->row_index[L->nnz-2] = 0;
+    L->col_ptr[L->cols-1]  = L->nnz-2;
+
+    L->val[L->nnz-1]       = a;
+    L->row_index[L->nnz-1] = L->rows - 1;
+
+    int i = 2;
+    int j = 1;
+    int counter = 2;
+    while(i < L->nnz - 2){
+        L->col_ptr[j] = counter;
+
+        L->val[i] = a;
+        L->row_index[i++] = j;
+
+        L->val[i] = c;
+        L->row_index[i++] = j+1;
+
+        L->col_ptr[j+1] = counter + 2;
+
+        L->val[i] = b;
+        L->row_index[i++] = j;
+        L->val[i] = a;
+        L->row_index[i++] = j+1;
+
+        j += 2;
+        counter += 4;
+    }
+
+    return L;
+}
+
+CCSMatrix
 ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
-    // TODO arreglar este 100 cableado!!
     int elemEstimate = 6 + (ccs1->rows * ccs2->cols) * 0.1;
     CCSMatrix ret = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
 
@@ -93,8 +141,9 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
             columnStarterNotFound = true;
             currentVal = 0.0;
 
-            if(ccs2->col_ptr[j+1] - ccs2->col_ptr[j] == 0){     // If no nonzero elements present in the column...
-                // El producto da cero, seguir con la próxima col
+            // If no nonzero elements are present in the column...
+            if(ccs2->col_ptr[j+1] - ccs2->col_ptr[j] == 0){
+                // The element is zero, so just continue with the next one.
                 stepsToBacktrack++;
                 continue;
             }
@@ -103,7 +152,7 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
                 currentVal += ccsValueAt(i ,ccs2->row_index[k], ccs1) * ccs2->val[k];
             }
 
-            if(abs(currentVal) < EPSILON){
+            if(fabs(currentVal) < EPSILON){
                 continue;
             }
 
@@ -116,10 +165,25 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
                 columnStarterNotFound = false;
             }
 
+            /* Make sure enough memory has been allocated */
+            if(nnz == elemEstimate){
+                elemEstimate *= 1.3;     // Arbitrary incremental value
+                double *dp = realloc(ret->val, elemEstimate * sizeof(ret->val[0]));
+                int    *ip = realloc(ret->row_index, elemEstimate * sizeof(ret->row_index[0]));
+                if(dp == NULL || ip == NULL){
+                    perror("Not enough memory");
+                    exit(EXIT_FAILURE);
+                }
+                ret->val = dp;
+                ret->row_index = ip;
+            }
+
             ret->val[nnz] = currentVal;
             ret->row_index[nnz] = i;
             nnz++;
         }
+        // Needed for the case in which even though there are elements in the
+        // column the total sum is zero.
         if(ret->col_ptr[j] == -1) stepsToBacktrack++;
     }
     ret->nnz = nnz;
@@ -154,69 +218,6 @@ reallocCCS(CCSMatrix ccs){
     ccs->col_ptr   = ip2;
     return true;
 }
-
-/*
-   CCSMatrix
-   build_CCS_L(int size){
-   CCSMatrix L  = newCCSMatrix(4 + 4*((size/2)-1), size, size);
-
-   double beta = PI / 4;
-
-   double a = cos(beta);
-   double b = sin(beta);
-   double c = -b;
-
-   L->val[0]        = cos(beta);
-   L->val[1]        = -sin(beta);
-   L->val[L->nnz-2] = sin(beta);
-   L->val[L->nnz-1] = cos(beta);
-
-   int i = 0;
-   int j = 0;
-   int counter = 0;
-   while(i < L->nnz){
-   L->col_ptr[j] = counter;
-
-   L->val[i] = a;
-   L->row_index[i++] = j;
-   L->val[i] = c;
-   L->row_index[i++] = j + 1;
-
-   L->col_ptr[j+1] = counter + 2;
-
-   L->val[i] = b;
-   L->row_index[i++] = j;
-   L->val[i] = a;
-   L->row_index[i++] = j + 1;
-   j += 2;
-   counter += 4;
-   }
-
-   return L;
-   }
-
-   Matrix
-   build_L(int size){
-   Matrix L = nullMatrix(size, size);
-
-   double beta = PI / 4;
-
-   size--;
-   L->elem[0][0]       = cos(beta);
-   L->elem[0][size]    = -sin(beta);
-   L->elem[size][0]    = sin(beta);
-   L->elem[size][size] = cos(beta);
-
-   while(size > 2){
-   L->elem[size-1][size-1] = a;
-   L->elem[size-1][size-2] = c;
-   L->elem[size-2][size-1] = b;
-   L->elem[size-2][size-2] = a;
-   size -= 2;
-   }
-   return L;
-   }
-   */
 
 void
 freeCCSMatrix(CCSMatrix mat){
@@ -307,26 +308,12 @@ matrixToCCS(Matrix mat){
     return ret;
 }
 
-/*
-   void
-   print_CCSMatrix(CCSMatrix ccs){
-   int val_index = 0;
-
-   int i = 0, j = 0;
-   while(i < ccs->rows){
-   while(j < ccs->cols){
-   if(ccs->row_index[ccs->col_ptr[j]] == i)
-   if(ccs->row_index[val_index] == i && ccs->col_ptr[j] == ){
-   printf("");
-   }else{
-   printf("0 ");
-   }
-
-   }
-   }
-   if( i == ccs->row_index[i] )
-
-   }
-   }
-   }
-   */
+void
+print_CCSMatrix(CCSMatrix ccs){
+    for(int i = 0; i < ccs->rows; i++){
+        for(int j = 0; j < ccs->cols; j++){
+            printf("%7.3f ", ccsValueAt(i, j, ccs));
+        }
+        putchar('\n');
+    }
+}

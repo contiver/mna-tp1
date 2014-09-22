@@ -13,15 +13,7 @@ main(int argc, char *argv[]){
     sscanf(argv[1], "%d", &m);
     int size = 2 * m;
 
-    Matrix K = build_K(size);
-    Matrix L = build_L(size);
-    Matrix A = matrixMult(L, K);
-
-    printf("Matrix K for m = %d:\n", m);
-    printMatrix(K);
-
-    printf("\nMatrix L for m = %d:\n", m);
-    printMatrix(L);
+    Matrix A = build_A(m);
 
     printf("\nMatrix A for m = %d:\n", m);
     printMatrix(A);
@@ -29,8 +21,6 @@ main(int argc, char *argv[]){
     //Matrix p = powerIteration(A);
     //printEigenvector(p);
 
-    freeMatrix(K);
-    freeMatrix(L);
     freeMatrix(A);
 
     return EXIT_SUCCESS;

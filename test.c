@@ -13,15 +13,18 @@ main(int argc, char *argv[]){
     sscanf(argv[1], "%d", &m);
 
     CCSMatrix K = build_CCS_K(2*m);
-    CCSMatrix K2 = build_CCS_K(2*m);
-    CCSMatrix M = ccsMult(K, K2);
+    CCSMatrix L = build_CCS_L(2*m);
+    CCSMatrix A = ccsMult(K, L);
 
-    printCCS(M);
-    Matrix R = ccsToMatrix(M);
-    printMatrix(R);
+    printf("Matrix K is: \n");
+    print_CCSMatrix(K);
+    printf("Matrix L is: \n");
+    print_CCSMatrix(L);
+    printCCS(A);
+    print_CCSMatrix(A);
 
-    printf("The right value of K * K is\n");
-    printMatrix(matrixMult(build_K(2*m), build_K(2*m)));
+    printf("The real Matrix A is: \n");
+    printMatrix(build_A(m));
 
     return EXIT_SUCCESS;
 }

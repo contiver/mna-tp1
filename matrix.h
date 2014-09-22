@@ -38,6 +38,8 @@ Matrix copyMatrix(Matrix mat);
 /* Returns the matrix multiplication between m1 and m2 */
 Matrix matrixMult(Matrix m1, Matrix m2);
 
+Matrix build_A(int size);
+
 /* Returns the L matrix of the Ising model
  * Expects size of the matrix, i.e. 2*m
  */
@@ -75,16 +77,25 @@ CCSMatrix identityCCSMatrix(int size);
 
 CCSMatrix build_CCS_K(int size);
 
+CCSMatrix build_CCS_L(int size);
+
 void freeCCSMatrix(CCSMatrix mat);
 
+/* Returns a new dense matrix with the elements of the input CCSMatrix */
 Matrix ccsToMatrix(CCSMatrix ccs);
 
+/* Returns a new CCSMatrix with the elements of the input dense matrix */
 CCSMatrix matrixToCCS(Matrix mat);
 
+/* Returns the multiplication of ccs1 with ccs2 into a new CCSMatrix */
 CCSMatrix ccsMult(CCSMatrix ccs1, CCSMatrix ccs2);
 
+/* Returns the value at position (row,col) in ccs */
 double ccsValueAt(int row, int col, CCSMatrix ccs);
 
+/* Prints memory representation, mainly for debugging */
 void printCCS(CCSMatrix ccs);
+
+void print_CCSMatrix(CCSMatrix ccs);
     
 #endif

@@ -40,6 +40,18 @@ newMatrix(int rows, int cols){
 }
 
 Matrix
+build_A(int m){
+    Matrix K = build_K(2*m);
+    Matrix L = build_L(2*m);
+    Matrix A = matrixMult(L, K);
+
+    freeMatrix(K);
+    freeMatrix(L);
+
+    return A;
+}
+
+Matrix
 build_K(int size){
     Matrix K = nullMatrix(size, size);
 

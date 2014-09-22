@@ -137,19 +137,21 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
     }
 
     for(j = 0; j < ccs2->cols; j++){
+        columnStarterNotFound = true;
         for(i = 0; i < ccs1->rows; i++){
-            columnStarterNotFound = true;
             currentVal = 0.0;
 
             // If no nonzero elements are present in the column...
             if(ccs2->col_ptr[j+1] - ccs2->col_ptr[j] == 0){
                 // The element is zero, so just continue with the next one.
                 stepsToBacktrack++;
-                continue;
+                break;
             }
 
             for(int k = ccs2->col_ptr[j]; k < ccs2->col_ptr[j+1]; k++){
-                currentVal += ccsValueAt(i ,ccs2->row_index[k], ccs1) * ccs2->val[k];
+                double ccs1Val = ccsValueAt(i ,ccs2->row_index[k], ccs1);
+                currentVal += ccs1Val * ccs2->val[k];
+                //currentVal += ccsValueAt(i ,ccs2->row_index[k], ccs1) * ccs2->val[k];
             }
 
             if(fabs(currentVal) < EPSILON){
@@ -184,7 +186,7 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
         }
         // Needed for the case in which even though there are elements in the
         // column the total sum is zero.
-        if(ret->col_ptr[j] == -1) stepsToBacktrack++;
+        //if(ret->col_ptr[j] == -1) stepsToBacktrack++;
     }
     ret->nnz = nnz;
     ret->col_ptr[ret->cols] = nnz;

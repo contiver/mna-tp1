@@ -43,7 +43,7 @@ Matrix
 build_A(int m){
     Matrix K = build_K(2*m);
     Matrix L = build_L(2*m);
-    Matrix A = matrixMult(L, K);
+    Matrix A = matrixMult(K, L);
 
     freeMatrix(K);
     freeMatrix(L);

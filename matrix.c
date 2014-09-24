@@ -6,6 +6,8 @@ static double norm2(Matrix vec);
 /* Allocates a Matrix or rows x cols size, but doesn't initialize it */
 static Matrix newMatrix(int rows, int cols);
 
+Matrix matrixAddition(Matrix mat1, Matrix mat2);
+void scalarMult(double scalar, Matrix mat);
 
 Matrix
 nullMatrix(int rows, int cols){
@@ -186,10 +188,21 @@ powerIteration(Matrix A){
     Matrix p = nullMatrix(A->rows, 1);
     double norm;
 
+    /*
     for(int i = 0; i < A->rows; i++){
         p->elem[i] = malloc(sizeof(p->elem[i]));
         p->elem[i][0] = 1.0;
     }
+    */
+
+    /*
+    p->elem[0][0] = 1;
+    p->elem[1][0] = -0.5;
+    p->elem[2][0] = 1;
+    */
+    p->elem[0][0] = -1;
+    p->elem[1][0] = 2;
+    p->elem[2][0] = 2;
 
     /* cableadas 100 iteraciones, modificar */
     for(int i = 0; i < 100; i++){
@@ -206,9 +219,11 @@ Matrix
 copyMatrix(Matrix mat){
     Matrix ret = newMatrix(mat->rows, mat->cols);
 
-    for(int i = 0; i < mat->rows; i++)
-        for(int j = 0; j < mat->cols; j++)
+    for(int i = 0; i < mat->rows; i++){
+        for(int j = 0; j < mat->cols; j++){
             ret->elem[i][j] = mat->elem[i][j];
+        }
+    }
 
     return ret;
 }
@@ -257,4 +272,13 @@ cols(Matrix M){
 int
 rows(Matrix M){
     return M->rows;
+}
+
+void
+scalarMult(double scalar, Matrix mat){
+    for(int i = 0; i < mat->rows; i++){
+        for(int j = 0; j < mat->cols; j++){
+            mat->elem[i][j] *= scalar;
+        }
+    }
 }

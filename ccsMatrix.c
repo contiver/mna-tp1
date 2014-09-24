@@ -1,13 +1,15 @@
 #include "matrix.h"
 
-#define EPSILON 0.0000001
+#define EPSILON 0.0000000000001
 
 /* ========================================================================= */
-/* Compressed sparse column matrix, a.k.a
- * Compressed column storage */
+/* Compressed sparse column matrix, a.k.a  Compressed column storage         */
 
-static CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
+CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
 double ccsValueAt(int row, int col, CCSMatrix ccs);
+bool reallocCCS(CCSMatrix ccs);
+CCSMatrix transposeCRS(CRSMatrix crs);
+void ccsScalarMult(double scalar, CCSMatrix ccs);
 
 CCSMatrix
 identityCCSMatrix(int size){
@@ -23,7 +25,7 @@ identityCCSMatrix(int size){
     return ret;
 }
 
-static CCSMatrix
+CCSMatrix
 newCCSMatrix(int nnz, int rows, int cols){
     CCSMatrix ret      = malloc(sizeof(CCSMatrixCDT));
     ret->val           = malloc(nnz * sizeof (ret->val[0]));
@@ -35,6 +37,16 @@ newCCSMatrix(int nnz, int rows, int cols){
     ret->col_ptr[cols] = nnz;
 
     return ret;
+}
+
+CCSMatrix
+build_CCS_A(int m){
+    CCSMatrix K = build_CCS_K(2*m);
+    CCSMatrix L = build_CCS_L(2*m);
+    CCSMatrix A = ccsMult(K,L);
+    freeCCSMatrix(K);
+    freeCCSMatrix(L);
+    return A;
 }
 
 CCSMatrix
@@ -132,6 +144,7 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
     bool columnStarterNotFound;
 
     int i, j;
+    // TODO ver si esto todavía es necesario !
     for(i = 0; i < ret->cols; i++){
         ret->col_ptr[i] = -1;
     }
@@ -317,5 +330,24 @@ print_CCSMatrix(CCSMatrix ccs){
             printf("%7.3f ", ccsValueAt(i, j, ccs));
         }
         putchar('\n');
+    }
+}
+
+CCSMatrix
+transposeCRS(CRSMatrix crs){
+    CCSMatrix ret = newCCSMatrix(crs->nnz, crs->cols, crs->rows);
+    memcpy(ret->val, crs->val, crs->nnz * sizeof(ret->val[0]));
+    memcpy(ret->row_index, crs->col_index, crs->nnz * sizeof(ret->row_index[0]));
+    memcpy(ret->col_ptr, crs->row_ptr, crs->nnz * sizeof(ret->col_ptr[0]));
+
+    return ret;
+}
+
+/* FIXME Naive approach! if scalar is zero or small enough that the
+ * product is rounded to zero, it breaks the data stracture. */
+void
+ccsScalarMult(double scalar, CCSMatrix ccs){
+    for(int i = 0; i < ccs->nnz; i++){
+        ccs->val[i] *= scalar;
     }
 }

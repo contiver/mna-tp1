@@ -2,6 +2,7 @@
 #define MATRIX_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <math.h>
 
@@ -21,10 +22,21 @@ typedef struct CCSMatrixCDT {
     int     *row_index;
     int     *col_ptr;
     double  *val;
+    int      nnz; int      rows;
+    int      cols;
+} CCSMatrixCDT;
+
+typedef struct CRSMatrixCDT *CRSMatrix;
+
+typedef struct CRSMatrixCDT {
+    int     *col_index;
+    int     *row_ptr;
+    double  *val;
     int      nnz;
     int      rows;
     int      cols;
-} CCSMatrixCDT;
+} CRSMatrixCDT;
+
 
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
@@ -73,13 +85,17 @@ int rows(Matrix mat);
 /* Compressed sparse column matrix, a.k.a Compressed column storage. Provides
  * efficient storage for sparse matrices.*/
 
+CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
+
+void freeCCSMatrix(CCSMatrix mat);
+
 CCSMatrix identityCCSMatrix(int size);
 
 CCSMatrix build_CCS_K(int size);
 
 CCSMatrix build_CCS_L(int size);
 
-void freeCCSMatrix(CCSMatrix mat);
+CCSMatrix build_CCS_A(int m);
 
 /* Returns a new dense matrix with the elements of the input CCSMatrix */
 Matrix ccsToMatrix(CCSMatrix ccs);

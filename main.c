@@ -11,17 +11,14 @@ main(int argc, char *argv[]){
     }
     int m;
     sscanf(argv[1], "%d", &m);
-    int size = 2 * m;
 
-    Matrix A = build_A(m);
+    CCSMatrix A = build_CCS_A(m);
 
     printf("\nMatrix A for m = %d:\n", m);
-    printMatrix(A);
+    printCCS(A);
+    print_CCSMatrix(A);
 
-    //Matrix p = powerIteration(A);
-    //printEigenvector(p);
-
-    freeMatrix(A);
+    freeCCSMatrix(A);
 
     return EXIT_SUCCESS;
 }

@@ -1,5 +1,9 @@
 #include <stdlib.h>
 
+/* More efficient implementation of dense matrices, using a single
+ * array to represent the whole matrix instead of an array of arrays.
+ * element (i,j) is accessed by elem[(i*cols) + j]
+ */
 typedef struct MatrixCDT *Matrix;
 
 typedef struct MatrixCDT{

@@ -29,6 +29,7 @@ Notar que la matriz A tiene:
 --> 8*m nnz si m > 1
 
 También que la forma es predecible (a excepción de m = 1)
+==> Optimización: No crear K ni L, hacer A directo!
 
 m = 1
         1 0

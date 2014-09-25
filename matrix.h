@@ -2,8 +2,8 @@
 #define MATRIX_H
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 
 #define PI 3.14159265358979323846264338327
@@ -22,7 +22,8 @@ typedef struct CCSMatrixCDT {
     int     *row_index;
     int     *col_ptr;
     double  *val;
-    int      nnz; int      rows;
+    int      nnz;
+    int      rows;
     int      cols;
 } CCSMatrixCDT;
 
@@ -37,11 +38,10 @@ typedef struct CRSMatrixCDT {
     int      cols;
 } CRSMatrixCDT;
 
-
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
 
-/* free memory used by Matrix ADT */
+/* free memory used by mat */
 void freeMatrix(Matrix mat);
 
 /* Returns a deep copy of mat */
@@ -50,6 +50,9 @@ Matrix copyMatrix(Matrix mat);
 /* Returns the matrix multiplication between m1 and m2 */
 Matrix matrixMult(Matrix m1, Matrix m2);
 
+/* Returns the A matrix of the Ising model
+ * Expects size of the matrix, i.e. 2*m
+ */
 Matrix build_A(int size);
 
 /* Returns the L matrix of the Ising model
@@ -85,17 +88,15 @@ int rows(Matrix mat);
 /* Compressed sparse column matrix, a.k.a Compressed column storage. Provides
  * efficient storage for sparse matrices.*/
 
-CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
-
-void freeCCSMatrix(CCSMatrix mat);
-
 CCSMatrix identityCCSMatrix(int size);
+
+CCSMatrix build_CCS_A(int size);
 
 CCSMatrix build_CCS_K(int size);
 
 CCSMatrix build_CCS_L(int size);
 
-CCSMatrix build_CCS_A(int m);
+void freeCCSMatrix(CCSMatrix mat);
 
 /* Returns a new dense matrix with the elements of the input CCSMatrix */
 Matrix ccsToMatrix(CCSMatrix ccs);
@@ -113,5 +114,5 @@ double ccsValueAt(int row, int col, CCSMatrix ccs);
 void printCCS(CCSMatrix ccs);
 
 void print_CCSMatrix(CCSMatrix ccs);
-    
+
 #endif

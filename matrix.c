@@ -1,35 +1,39 @@
+#include <stdarg.h>
 #include "matrix.h"
 
 
+/* Allocates a Matrix or rows x cols size, but doesn't initialize it */
+Matrix newMatrix(int rows, int cols);
+
 static double norm2(Matrix vec);
 
-/* Allocates a Matrix or rows x cols size, but doesn't initialize it */
-static Matrix newMatrix(int rows, int cols);
-
+void * xmalloc(size_t len);
+void * xcalloc(size_t nmemb, size_t size);
+void * xrealloc(void *p, size_t len);
+void die(const char *errstr, ...);
 Matrix matrixAddition(Matrix mat1, Matrix mat2);
-void scalarMult(double scalar, Matrix mat);
+void scalarProduct(double scalar, Matrix mat);
 
 Matrix
 nullMatrix(int rows, int cols){
-    Matrix ret   = malloc(sizeof(MatrixCDT));
-    ret->elem    = malloc(rows * sizeof(*(ret->elem)));
-    ret->elem[0] = calloc(sizeof(*(ret->elem[0])), rows * cols);
+    Matrix ret   = xmalloc(sizeof(MatrixCDT));
+    ret->elem    = xmalloc(rows * sizeof(*(ret->elem)));
+    ret->elem[0] = xcalloc(sizeof(*(ret->elem[0])), rows * cols);
+    ret->rows    = rows;
+    ret->cols    = cols;
 
     for(int i = 0; i < rows; i++){
         ret->elem[i] = ret->elem[0] + cols * i;
     }
 
-    ret->rows = rows;
-    ret->cols = cols;
-
     return ret;
 }
 
-static Matrix
+Matrix
 newMatrix(int rows, int cols){
-    Matrix ret   = malloc(sizeof(MatrixCDT));
-    ret->elem    = malloc(rows * sizeof(*(ret->elem)));
-    ret->elem[0] = malloc(rows * cols * sizeof(*(ret->elem[0])));
+    Matrix ret   = xmalloc(sizeof(MatrixCDT));
+    ret->elem    = xmalloc(rows * sizeof(*(ret->elem)));
+    ret->elem[0] = xmalloc(rows * cols * sizeof(*(ret->elem[0])));
 
     for(int i = 0; i < rows; i++){
         ret->elem[i] = ret->elem[0] + cols * i;
@@ -58,7 +62,6 @@ build_K(int size){
     Matrix K = nullMatrix(size, size);
 
     double alfa = PI / 4;
-
     double a = cos(alfa);
     double b = sin(alfa);
     double c = -b;
@@ -79,16 +82,15 @@ build_L(int size){
     Matrix L = nullMatrix(size, size);
 
     double beta = PI / 4;
-
-    size--;
-    L->elem[0][0]       = cos(beta);
-    L->elem[0][size]    = -sin(beta);
-    L->elem[size][0]    = sin(beta);
-    L->elem[size][size] = cos(beta);
-
     double a = cos(beta);
     double b = sin(beta);
     double c = -b;
+
+    size--;
+    L->elem[0][0]       = a;
+    L->elem[0][size]    = c;
+    L->elem[size][0]    = b;
+    L->elem[size][size] = a;
 
     while(size > 2){
         L->elem[size-1][size-1] = a;
@@ -108,11 +110,8 @@ build_L(int size){
 Matrix
 matrixMult(Matrix mat1, Matrix mat2){
     if(mat1->cols != mat2->rows){
-        char s[70];
-        sprintf(s,"Cannot multiply %d x %d matrix by a %d x %d matrix",
-                mat1->rows, mat1->cols, mat2->rows, mat1->cols);
-        perror(s);
-        exit(EXIT_FAILURE);
+        die("Cannot multiply a %d x %d matrix by a %d x %d matrix",
+            mat1->rows, mat1->cols, mat2->rows, mat1->cols);
     }
 
     Matrix ret = newMatrix(mat1->rows, mat2->cols);
@@ -170,10 +169,8 @@ printEigenvector(Matrix mat){
 
 void
 freeMatrix(Matrix mat){
-    if(mat->elem != NULL){
-        free(mat->elem[0]);
-        free(mat->elem);
-    }
+    free(mat->elem[0]);
+    free(mat->elem);
     free(mat);
 }
 
@@ -188,23 +185,12 @@ powerIteration(Matrix A){
     Matrix p = nullMatrix(A->rows, 1);
     double norm;
 
-    /*
     for(int i = 0; i < A->rows; i++){
         p->elem[i] = malloc(sizeof(p->elem[i]));
         p->elem[i][0] = 1.0;
     }
-    */
 
-    /*
-    p->elem[0][0] = 1;
-    p->elem[1][0] = -0.5;
-    p->elem[2][0] = 1;
-    */
-    p->elem[0][0] = -1;
-    p->elem[1][0] = 2;
-    p->elem[2][0] = 2;
-
-    /* cableadas 100 iteraciones, modificar */
+    /* FIXME cableadas 100 iteraciones, modificar */
     for(int i = 0; i < 100; i++){
         p = matrixMult(A, p);
         norm = norm2(p);
@@ -231,8 +217,7 @@ copyMatrix(Matrix mat){
 static double
 norm2(Matrix vec){
     if(vec->cols != 1){
-        perror("Bad usage of norm2 function. Aborting...");
-        exit(EXIT_FAILURE);
+        die("Bad usage of norm2 function. Aborting...");
     }
     double val = 0;
 
@@ -247,10 +232,11 @@ Matrix
 transpose(Matrix mat){
     Matrix ret = newMatrix(mat->cols, mat->rows);
 
-    for(int i = 0; i < mat->cols; i++)
-        for(int j = 0; j < mat->rows; j++)
+    for(int i = 0; i < mat->cols; i++){
+        for(int j = 0; j < mat->rows; j++){
             ret->elem[i][j] = mat->elem[j][i];
-
+        }
+    }
     return ret;
 }
 
@@ -260,25 +246,60 @@ identityMatrix(int size){
     for(int i = 0; i < size; i++){
         ret->elem[i][i] = 1.0;
     }
-
     return ret;
 }
 
 int
-cols(Matrix M){
-    return M->cols;
+cols(Matrix mat){
+    return mat->cols;
 }
 
 int
-rows(Matrix M){
-    return M->rows;
+rows(Matrix mat){
+    return mat->rows;
 }
 
 void
-scalarMult(double scalar, Matrix mat){
+scalarProduct(double scalar, Matrix mat){
     for(int i = 0; i < mat->rows; i++){
         for(int j = 0; j < mat->cols; j++){
             mat->elem[i][j] *= scalar;
         }
     }
+}
+
+void *
+xrealloc(void *p, size_t len) {
+    if( !(p = realloc(p, len)) )
+        die("Out of memory\n");
+
+    return p;
+}
+
+void *
+xmalloc(size_t len) {
+    void *p = malloc(len);
+
+    if(!p) die("Out of memory.\n");
+
+    return p;
+}
+
+void *
+xcalloc(size_t nmemb, size_t size) {
+    void *p = calloc(nmemb, size);
+
+    if(!p) die("Out of memory.\n");
+
+    return p;
+}
+
+void
+die(const char *errstr, ...) {
+    va_list ap;
+
+    va_start(ap, errstr);
+    vfprintf(stderr, errstr, ap);
+    va_end(ap);
+    exit(EXIT_FAILURE);
 }

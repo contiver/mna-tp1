@@ -66,7 +66,7 @@ Matrix build_L(int size);
 Matrix build_K(int size);
 
 /* Returns a new Matrix by transposing the elements of the input */
-Matrix transpose(Matrix mat);
+Matrix transposeMatrix(Matrix mat);
 
 Matrix identityMatrix(int size);
 

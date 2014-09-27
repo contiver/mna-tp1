@@ -1,18 +1,16 @@
 #include <stdarg.h>
 #include "matrix.h"
-
+#include "utils.h"
 
 /* Allocates a Matrix or rows x cols size, but doesn't initialize it */
 Matrix newMatrix(int rows, int cols);
 
-static double norm2(Matrix vec);
+void   scalarProduct(double scalar, Matrix mat);
+Matrix addMatrices(Matrix mat1, Matrix mat2);
+Matrix substractMatrices(Matrix mat1, Matrix mat2);
 
-void * xmalloc(size_t len);
-void * xcalloc(size_t nmemb, size_t size);
-void * xrealloc(void *p, size_t len);
-void die(const char *errstr, ...);
-Matrix matrixAddition(Matrix mat1, Matrix mat2);
-void scalarProduct(double scalar, Matrix mat);
+static Matrix matrixFunction(double (*fn)(double,double), Matrix mat1, Matrix mat2);
+static double norm2(Matrix vec);
 
 Matrix
 nullMatrix(int rows, int cols){
@@ -25,7 +23,6 @@ nullMatrix(int rows, int cols){
     for(int i = 0; i < rows; i++){
         ret->elem[i] = ret->elem[0] + cols * i;
     }
-
     return ret;
 }
 
@@ -34,14 +31,12 @@ newMatrix(int rows, int cols){
     Matrix ret   = xmalloc(sizeof(MatrixCDT));
     ret->elem    = xmalloc(rows * sizeof(*(ret->elem)));
     ret->elem[0] = xmalloc(rows * cols * sizeof(*(ret->elem[0])));
+    ret->rows    = rows;
+    ret->cols    = cols;
 
     for(int i = 0; i < rows; i++){
         ret->elem[i] = ret->elem[0] + cols * i;
     }
-
-    ret->rows = rows;
-    ret->cols = cols;
-
     return ret;
 }
 
@@ -50,21 +45,18 @@ build_A(int m){
     Matrix K = build_K(2*m);
     Matrix L = build_L(2*m);
     Matrix A = matrixMult(K, L);
-
     freeMatrix(K);
     freeMatrix(L);
-
     return A;
 }
 
 Matrix
 build_K(int size){
-    Matrix K = nullMatrix(size, size);
-
+    Matrix K    = nullMatrix(size, size);
     double alfa = PI / 4;
-    double a = cos(alfa);
-    double b = sin(alfa);
-    double c = -b;
+    double a    = cos(alfa);
+    double b    = sin(alfa);
+    double c    = -b;
 
     size--;
     while(size > 0){
@@ -79,12 +71,11 @@ build_K(int size){
 
 Matrix
 build_L(int size){
-    Matrix L = nullMatrix(size, size);
-
+    Matrix L    = nullMatrix(size, size);
     double beta = PI / 4;
-    double a = cos(beta);
-    double b = sin(beta);
-    double c = -b;
+    double a    = cos(beta);
+    double b    = sin(beta);
+    double c    = -b;
 
     size--;
     L->elem[0][0]       = a;
@@ -129,21 +120,45 @@ matrixMult(Matrix mat1, Matrix mat2){
     return ret;
 }
 
-Matrix
-matrixAddition(Matrix mat1, Matrix mat2){
-    if(mat1->rows != mat2->rows || mat1->cols != mat2->cols){
-        perror("Can't add matrices of different size");
-        return NULL;
-    }
+static inline double
+plus(double a, double b){
+    return a + b;
+}
+
+static inline double
+minus(double a, double b){
+    return a - b;
+}
+
+static inline Matrix
+matrixFunction(double (*fn)(double,double), Matrix mat1, Matrix mat2){
     Matrix ret = newMatrix(mat1->rows, mat1->cols);
 
     for(int i = 0; i < mat1->rows; i++){
         for(int j = 0; j < mat1->cols; j++){
-            ret->elem[i][j] = mat1->elem[i][j] + mat2->elem[i][j];
+            ret->elem[i][j] = fn(mat1->elem[i][j], mat2->elem[i][j]);
         }
     }
 
     return ret;
+}
+
+Matrix
+addMatrices(Matrix mat1, Matrix mat2){
+    if(mat1->rows != mat2->rows || mat1->cols != mat2->cols){
+        die("Can't add a %d x %d matrix with a %d x %d one",
+             mat1->rows, mat1->cols, mat2->rows, mat2->cols);
+    }
+    return matrixFunction(plus, mat1, mat2);
+}
+
+Matrix
+substractMatrices(Matrix mat1, Matrix mat2){
+    if(mat1->rows != mat2->rows || mat1->cols != mat2->cols){
+        die("Can't substract a %d x %d matrix with a %d x %d one",
+             mat1->rows, mat1->cols, mat2->rows, mat2->cols);
+    }
+    return matrixFunction(minus, mat1, mat2);
 }
 
 void
@@ -157,48 +172,10 @@ printMatrix(Matrix mat){
 }
 
 void
-printEigenvector(Matrix mat){
-    printf("Eigenvector v1:\n");
-    printf("[%f", mat->elem[0][0]);
-
-    for(int i = 1; i < mat->rows; i++){
-        printf(" %f", mat->elem[i][0]);
-    }
-    printf("]\n");
-}
-
-void
 freeMatrix(Matrix mat){
     free(mat->elem[0]);
     free(mat->elem);
     free(mat);
-}
-
-/* Requires that:
- * A has an eigenvalue that is strictly greater in magnitude than its other
- * eigenvalues
- * The starting vector p has a nonzero component in the direction of an
- * eigenvector associated with the dominant eigenvalue.
- */
-Matrix
-powerIteration(Matrix A){
-    Matrix p = nullMatrix(A->rows, 1);
-    double norm;
-
-    for(int i = 0; i < A->rows; i++){
-        p->elem[i] = malloc(sizeof(p->elem[i]));
-        p->elem[i][0] = 1.0;
-    }
-
-    /* FIXME cableadas 100 iteraciones, modificar */
-    for(int i = 0; i < 100; i++){
-        p = matrixMult(A, p);
-        norm = norm2(p);
-        for(int j = 0; j < A->rows; j++){
-            p->elem[j][0] /= norm;
-        }
-    }
-    return p;
 }
 
 Matrix
@@ -210,26 +187,22 @@ copyMatrix(Matrix mat){
             ret->elem[i][j] = mat->elem[i][j];
         }
     }
-
     return ret;
 }
 
 static double
 norm2(Matrix vec){
-    if(vec->cols != 1){
-        die("Bad usage of norm2 function. Aborting...");
-    }
-    double val = 0;
+    if(vec->cols != 1) die("Bad usage of norm2 function. Aborting...");
 
+    double val = 0;
     for(int i = 0; i < vec->rows; i++){
         val += vec->elem[i][0] * vec->elem[i][0];
     }
-
     return sqrt(val);
 }
 
 Matrix
-transpose(Matrix mat){
+transposeMatrix(Matrix mat){
     Matrix ret = newMatrix(mat->cols, mat->rows);
 
     for(int i = 0; i < mat->cols; i++){
@@ -266,40 +239,4 @@ scalarProduct(double scalar, Matrix mat){
             mat->elem[i][j] *= scalar;
         }
     }
-}
-
-void *
-xrealloc(void *p, size_t len) {
-    if( !(p = realloc(p, len)) )
-        die("Out of memory\n");
-
-    return p;
-}
-
-void *
-xmalloc(size_t len) {
-    void *p = malloc(len);
-
-    if(!p) die("Out of memory.\n");
-
-    return p;
-}
-
-void *
-xcalloc(size_t nmemb, size_t size) {
-    void *p = calloc(nmemb, size);
-
-    if(!p) die("Out of memory.\n");
-
-    return p;
-}
-
-void
-die(const char *errstr, ...) {
-    va_list ap;
-
-    va_start(ap, errstr);
-    vfprintf(stderr, errstr, ap);
-    va_end(ap);
-    exit(EXIT_FAILURE);
 }

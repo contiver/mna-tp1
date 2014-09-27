@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "utils.h"
 
 #define EPSILON 0.0000000000001
 
@@ -6,24 +7,11 @@
 /* Compressed sparse column matrix, a.k.a  Compressed column storage         */
 
 CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
+CCSMatrix transposeCRS(CRSMatrix crs);
 double ccsValueAt(int row, int col, CCSMatrix ccs);
 bool reallocCCS(CCSMatrix ccs);
-CCSMatrix transposeCRS(CRSMatrix crs);
 void ccsScalarMult(double scalar, CCSMatrix ccs);
-
-CCSMatrix
-identityCCSMatrix(int size){
-    CCSMatrix ret = newCCSMatrix(size, size, size);
-
-    for(int i = 0; i < size; i++){
-        ret->row_index[i] = i;
-        ret->col_ptr[i]   = i;
-        ret->val[i]       = 1.0;
-    }
-    ret->col_ptr[size] = size;
-
-    return ret;
-}
+static inline int reallocret(int estimate, CCSMatrix ret);
 
 CCSMatrix
 newCCSMatrix(int nnz, int rows, int cols){
@@ -35,6 +23,28 @@ newCCSMatrix(int nnz, int rows, int cols){
     ret->rows          = rows;
     ret->cols          = cols;
     ret->col_ptr[cols] = nnz;
+
+    return ret;
+}
+
+void
+freeCCSMatrix(CCSMatrix mat){
+    free(mat->val);
+    free(mat->row_index);
+    free(mat->col_ptr);
+    free(mat);
+}
+
+CCSMatrix
+identityCCSMatrix(int size){
+    CCSMatrix ret = newCCSMatrix(size, size, size);
+
+    for(int i = 0; i < size; i++){
+        ret->row_index[i] = i;
+        ret->col_ptr[i]   = i;
+        ret->val[i]       = 1.0;
+    }
+    ret->col_ptr[size] = size;
 
     return ret;
 }
@@ -54,14 +64,11 @@ build_CCS_K(int size){
     CCSMatrix K  = newCCSMatrix(4*(size/2), size, size);
 
     double alfa = PI / 4;
+    double a    = cos(alfa);
+    double b    = sin(alfa);
+    double c    = -b;
 
-    double a = cos(alfa);
-    double b = sin(alfa);
-    double c = -b;
-
-    int i = 0;
-    int j = 0;
-    int counter = 0;
+    int i = 0, j = 0, counter = 0;
     while(i < K->nnz){
         K->col_ptr[j] = counter;
 
@@ -88,10 +95,9 @@ build_CCS_L(int size){
     CCSMatrix L  = newCCSMatrix(4 + 4*((size/2)-1), size, size);
 
     double beta = PI / 4;
-
-    double a = cos(beta);
-    double b = sin(beta);
-    double c = -b;
+    double a    = cos(beta);
+    double b    = sin(beta);
+    double c    = -b;
 
     L->val[0]              = a;
     L->row_index[0]        = 0;
@@ -107,9 +113,7 @@ build_CCS_L(int size){
     L->val[L->nnz-1]       = a;
     L->row_index[L->nnz-1] = L->rows - 1;
 
-    int i = 2;
-    int j = 1;
-    int counter = 2;
+    int i = 2, j = 1, counter = 2;
     while(i < L->nnz - 2){
         L->col_ptr[j] = counter;
 
@@ -136,7 +140,7 @@ build_CCS_L(int size){
 CCSMatrix
 ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
     int elemEstimate = 6 + (ccs1->rows * ccs2->cols) * 0.1;
-    CCSMatrix ret = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
+    CCSMatrix ret    = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
 
     int nnz = 0;
     double currentVal = 0.0;
@@ -145,9 +149,9 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
 
     int i, j;
     // TODO ver si esto todavía es necesario !
-    for(i = 0; i < ret->cols; i++){
-        ret->col_ptr[i] = -1;
-    }
+    //for(i = 0; i < ret->cols; i++){
+        //ret->col_ptr[i] = -1;
+    //}
 
     for(j = 0; j < ccs2->cols; j++){
         columnStarterNotFound = true;
@@ -182,15 +186,7 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
 
             /* Make sure enough memory has been allocated */
             if(nnz == elemEstimate){
-                elemEstimate *= 1.3;     // Arbitrary incremental value
-                double *dp = realloc(ret->val, elemEstimate * sizeof(ret->val[0]));
-                int    *ip = realloc(ret->row_index, elemEstimate * sizeof(ret->row_index[0]));
-                if(dp == NULL || ip == NULL){
-                    perror("Not enough memory");
-                    exit(EXIT_FAILURE);
-                }
-                ret->val = dp;
-                ret->row_index = ip;
+                elemEstimate = reallocret(elemEstimate, ret);
             }
 
             ret->val[nnz] = currentVal;
@@ -232,14 +228,6 @@ reallocCCS(CCSMatrix ccs){
     ccs->row_index = ip;
     ccs->col_ptr   = ip2;
     return true;
-}
-
-void
-freeCCSMatrix(CCSMatrix mat){
-    free(mat->val);
-    free(mat->row_index);
-    free(mat->col_ptr);
-    free(mat);
 }
 
 void
@@ -285,28 +273,28 @@ ccsToMatrix(CCSMatrix ccs){
     return ret;
 }
 
+static inline int
+reallocret(int estimate, CCSMatrix ret){
+    estimate *= 1.5;
+    double *dp = realloc(ret->val, estimate * sizeof(ret->val[0]));
+    int *ip = realloc(ret->row_index, estimate * sizeof(ret->row_index[0]));
+    if(!dp || !ip) die("Out of memory while creating a ccs matrix from a dense one");
+    ret->val = dp;
+    ret->row_index = ip;
+    return estimate;
+}
+
 CCSMatrix
 matrixToCCS(Matrix mat){
     int elemEstimate = (mat->cols * mat->rows) * 0.1 + 6;
     CCSMatrix ret = newCCSMatrix(elemEstimate, mat->rows, mat->cols);
-
-    double * dp;
-    int * ip;
 
     for(int col = 0; col < mat->cols; col++){
         bool columnStarterNotFound = true;
         for(int row = 0; row < mat->rows; row++){
             if(mat->elem[row][col] != 0.0){
                 if(ret->nnz == elemEstimate){
-                    elemEstimate *= 1.3;     // Arbitrary incremental value
-                    dp = realloc(ret->val, elemEstimate * sizeof(ret->val[0]));
-                    ip = realloc(ret->row_index, elemEstimate * sizeof(ret->row_index[0]));
-                    if(dp == NULL || ip == NULL){
-                        perror("Not enough memory");
-                        exit(EXIT_FAILURE);
-                    }
-                    ret->val = dp;
-                    ret->row_index = ip;
+                    elemEstimate = reallocret(elemEstimate, ret);
                 }
                 ret->val[ret->nnz] = mat->elem[row][col];
                 ret->row_index[ret->nnz] = row;
@@ -344,7 +332,7 @@ transposeCRS(CRSMatrix crs){
 }
 
 /* FIXME Naive approach! if scalar is zero or small enough that the
- * product is rounded to zero, it breaks the data stracture. */
+ * product is rounded to zero, it breaks the data structure. */
 void
 ccsScalarMult(double scalar, CCSMatrix ccs){
     for(int i = 0; i < ccs->nnz; i++){

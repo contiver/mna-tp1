@@ -2,6 +2,8 @@
 #include "matrix.h"
 #include "utils.h"
 
+#define MIN(a, b)  ((a) > (b) ? (a) : (b))
+
 /* Allocates a Matrix or rows x cols size, but doesn't initialize it */
 Matrix newMatrix(int rows, int cols);
 
@@ -11,6 +13,7 @@ Matrix substractMatrices(Matrix mat1, Matrix mat2);
 
 static Matrix matrixFunction(double (*fn)(double,double), Matrix mat1, Matrix mat2);
 static double norm2(Matrix vec);
+static void   copyColumn(int col, Matrix src, double *dest);
 
 Matrix
 nullMatrix(int rows, int cols){
@@ -240,3 +243,34 @@ scalarProduct(double scalar, Matrix mat){
         }
     }
 }
+
+static int
+sign(double x){
+    return (x > 0) - (x < 0);
+}
+
+void
+copyColumn(int col, Matrix src, double *dest){
+    for(int row = 0; row < src->rows; row++){
+        dest[row] = src->elem[row][col];
+    }
+}
+
+/* TODO terminar código
+ * Ejemplo de código C y explicación en:
+ * http://rosettacode.org/wiki/QR_decomposition
+ */
+/*
+void
+householder(Matrix mat, Matrix Q, Matrix R){
+    Matrix q[mat->rows];
+    Matrix z = mat, z1;
+
+    //double u[] = substractVector()a - norm(a)*e;
+
+    int minDim = MIN(mat->rows-1, mat->cols);
+    for(int k = 0; k < minDim; k++){
+        double basisVector[mat->rows];
+    }
+}
+*/

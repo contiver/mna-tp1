@@ -1,3 +1,4 @@
+#CC = musl-gcc
 CC = gcc
 FLAGS = -pedantic -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -O3 -lm -std=c11
 # add this later!

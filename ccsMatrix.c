@@ -62,29 +62,26 @@ build_CCS_A(int m){
 CCSMatrix
 build_CCS_K(int size){
     CCSMatrix K  = newCCSMatrix(4*(size/2), size, size);
-
-    double alfa = PI / 4;
-    double a    = cos(alfa);
-    double b    = sin(alfa);
-    double c    = -b;
+    double alfa  = PI / 4;
+    double a     = cos(alfa);
+    double b     = sin(alfa);
+    double c     = -b;
 
     int i = 0, j = 0, counter = 0;
-    while(i < K->nnz){
-        K->col_ptr[j] = counter;
-
-        K->val[i] = a;
+    for(int i = 0, j = 0, counter = 0; i < K->nnz; j += 2, counter += 4){
+        K->col_ptr[j]     = counter;
+        K->val[i]         = a;
         K->row_index[i++] = j;
-        K->val[i] = c;
+
+        K->val[i]         = c;
         K->row_index[i++] = j + 1;
 
-        K->col_ptr[j+1] = counter + 2;
-
-        K->val[i] = b;
+        K->col_ptr[j+1]   = counter + 2;
+        K->val[i]         = b;
         K->row_index[i++] = j;
-        K->val[i] = a;
+
+        K->val[i]         = a;
         K->row_index[i++] = j + 1;
-        j += 2;
-        counter += 4;
     }
 
     return K;
@@ -93,11 +90,10 @@ build_CCS_K(int size){
 CCSMatrix
 build_CCS_L(int size){
     CCSMatrix L  = newCCSMatrix(4 + 4*((size/2)-1), size, size);
-
-    double beta = PI / 4;
-    double a    = cos(beta);
-    double b    = sin(beta);
-    double c    = -b;
+    double beta  = PI / 4;
+    double a     = cos(beta);
+    double b     = sin(beta);
+    double c     = -b;
 
     L->val[0]              = a;
     L->row_index[0]        = 0;
@@ -114,7 +110,7 @@ build_CCS_L(int size){
     L->row_index[L->nnz-1] = L->rows - 1;
 
     int i = 2, j = 1, counter = 2;
-    while(i < L->nnz - 2){
+    for(int i = 2, j = 1, counter = 2; i < L->nnz - 2; j += 2, counter += 4){
         L->col_ptr[j] = counter;
 
         L->val[i] = a;
@@ -129,9 +125,6 @@ build_CCS_L(int size){
         L->row_index[i++] = j;
         L->val[i] = a;
         L->row_index[i++] = j+1;
-
-        j += 2;
-        counter += 4;
     }
 
     return L;
@@ -141,21 +134,19 @@ CCSMatrix
 ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
     int elemEstimate = 6 + (ccs1->rows * ccs2->cols) * 0.1;
     CCSMatrix ret    = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
-
     int nnz = 0;
-    double currentVal = 0.0;
     int stepsToBacktrack = 0;
+    double currentVal = 0.0;
     bool columnStarterNotFound;
 
-    int i, j;
     // TODO ver si esto todavía es necesario !
     //for(i = 0; i < ret->cols; i++){
         //ret->col_ptr[i] = -1;
     //}
 
-    for(j = 0; j < ccs2->cols; j++){
+    for(int j = 0; j < ccs2->cols; j++){
         columnStarterNotFound = true;
-        for(i = 0; i < ccs1->rows; i++){
+        for(int i = 0; i < ccs1->rows; i++){
             currentVal = 0.0;
 
             // If no nonzero elements are present in the column...
@@ -221,9 +212,8 @@ reallocCCS(CCSMatrix ccs){
     ip  = realloc(ccs->row_index, ccs->nnz * sizeof(ccs->row_index[0]));
     ip2 = realloc(ccs->col_ptr, (ccs->cols + 1) * sizeof(ccs->col_ptr[0]));
 
-    if(dp == NULL || ip == NULL || ip2 == NULL){
-        return false;
-    }
+    if(!dp || !ip || !ip2) return false;
+
     ccs->val       = dp;
     ccs->row_index = ip;
     ccs->col_ptr   = ip2;

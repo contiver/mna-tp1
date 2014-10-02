@@ -67,7 +67,6 @@ build_CCS_K(int size){
     double b     = sin(alfa);
     double c     = -b;
 
-    int i = 0, j = 0, counter = 0;
     for(int i = 0, j = 0, counter = 0; i < K->nnz; j += 2, counter += 4){
         K->col_ptr[j]     = counter;
         K->val[i]         = a;
@@ -109,7 +108,6 @@ build_CCS_L(int size){
     L->val[L->nnz-1]       = a;
     L->row_index[L->nnz-1] = L->rows - 1;
 
-    int i = 2, j = 1, counter = 2;
     for(int i = 2, j = 1, counter = 2; i < L->nnz - 2; j += 2, counter += 4){
         L->col_ptr[j] = counter;
 

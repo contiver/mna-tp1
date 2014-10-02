@@ -55,3 +55,60 @@ m = 4
         0.0   0.0   0.0   0.5  -0.5   0.5   0.5   0.0
         0.5   0.0   0.0   0.0   0.0  -0.5   0.5   0.5
         0.5   0.0   0.0   0.0   0.0   0.5  -0.5   0.5
+
+==============================================================================
+Para el pdf:
+
+Primero se trató con una implementación simplista de matrices densas,
+representandola como un arreglo de arreglos. Esto tiene la ventaja de ser
+facil de programar, y más intuitivo de razonar, ya que la notación a la hora
+de acceder a elementos de la matriz es más matemática que en resto.
+Se probó creando las matrices K y L, y multiplicandolas mediante el clásico
+algoritmo de producto de matrices de O(n^3) para generar la matriz A.
+Esto hasta matrices de m = 500 es relativamente rápido, pero al probar m = 1000,
+necesitó de 1 minuto para procesarla.
+
+Luego se intentó aprovechar el hecho de que las matrices son ralas, y se optó
+por una estructura de datos más adecuada conocida como "Compressed column storage",
+o alternativamente "Compressed sparse column", que es la representación tradicional
+utilizada en MATLAB al usar la función "sparse".
+
+En esta representación se tiene 3 arreglos, uno con los valores no nulos de
+la matriz, de tamaño nnz (del inglés "number of nonzeros"), el otro del mismo
+tamaño, indicando el indice de la fila del elemento, y por último un arreglo
+de tamaño la cantidad de columnas más uno, donde en la posición j del arreglo
+se guarda el índice en el arreglo de valores, en el que se encuentra el primer
+elemento no nulo de la columna j.
+Ejemplo (indices comenzando en 0):
+
+    0 3 0 5 7
+    0 0 0 3 8
+    1 0 0 0 0
+    0 2 0 0 5
+
+val = [1,3,2,5,3,7,8,5]
+ri  = [2,0,3,0,1,0,1,3]
+cp  = [0,1,3,3,5,8]
+
+Notar que la tercera columna no tiene valores. Esto se representa usando el
+mismo valor en cp que en la próxima columna. Esto es consistente con el hecho
+de que la cantidad de elementos no nulos presentes en la columna j se pueden conocer
+haciendo cp[j+1] - cp[j].
+
+Con esta representación, se logra un algoritmo de multiplicación significativamente
+más eficiente (siempre y cuando las matrices efectivamente sean ralas y no densas),
+ya que es posible saltearse todos los productos con elementos nulos.
+
+Notar que para una matriz densa de m x n, se necesitan m punteros en memoria, cada
+uno apuntando a los m arreglos de n elementos, es decir, se necesita.
+En comparación, con una matriz en representación CCS se necesita espacio para
+nnz*sizeof(elems) + (nnz + cols)*sizeof(indeces). Para una aproximación más
+facil de entender, si suponemos que el tamaño de indices, elementos, y punteros
+en memoria usan todos a misma cantidad de bytes, tenemos que la complejidad
+espacial de la matriz densa es m + m*n, es decir, O(m*n), mientras que la
+de la matriz rala es 2*nnz + n, O(nnz + n).
+
+Con esta representación, la creación de las matrices K y L, y su subsecuente producto
+para generar la matriz A, para m = 10000, fue de aproximadamente 3.5 segundos, y para
+m = 100000 tardó al rededor de los 6 minutos.
+***** (hacer más ensayos y luego comparar la razón entre ambos para ver la mejora en una tabla!) *****

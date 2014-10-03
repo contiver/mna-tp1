@@ -27,17 +27,6 @@ typedef struct CCSMatrixCDT {
     int      cols;
 } CCSMatrixCDT;
 
-typedef struct CRSMatrixCDT *CRSMatrix;
-
-typedef struct CRSMatrixCDT {
-    int     *col_index;
-    int     *row_ptr;
-    double  *val;
-    int      nnz;
-    int      rows;
-    int      cols;
-} CRSMatrixCDT;
-
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
 

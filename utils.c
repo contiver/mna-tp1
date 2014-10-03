@@ -7,7 +7,6 @@ void *
 xrealloc(void *p, size_t len) {
     if( !(p = realloc(p, len)) )
         die("Out of memory\n");
-
     return p;
 }
 
@@ -15,8 +14,8 @@ void *
 xmalloc(size_t len) {
     void *p = malloc(len);
 
-    if(!p) die("Out of memory.\n");
-
+    if(!p)
+        die("Out of memory.\n");
     return p;
 }
 
@@ -24,8 +23,8 @@ void *
 xcalloc(size_t nmemb, size_t size) {
     void *p = calloc(nmemb, size);
 
-    if(!p) die("Out of memory.\n");
-
+    if(!p)
+        die("Out of memory.\n");
     return p;
 }
 

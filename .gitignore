@@ -1,5 +1,7 @@
-A_matrix
 a.out
+denseA
+ccsA
+hardcodedCCSA
 *.h.gch
 *.o
-docs
+

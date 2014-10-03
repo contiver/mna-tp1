@@ -7,10 +7,7 @@
 /* Compressed sparse column matrix, a.k.a  Compressed column storage         */
 
 CCSMatrix newCCSMatrix(int nnz, int rows, int cols);
-CCSMatrix transposeCRS(CRSMatrix crs);
 double ccsValueAt(int row, int col, CCSMatrix ccs);
-bool reallocCCS(CCSMatrix ccs);
-void ccsScalarMult(double scalar, CCSMatrix ccs);
 static inline int reallocret(int estimate, CCSMatrix ret);
 
 CCSMatrix
@@ -280,25 +277,6 @@ printCCS(CCSMatrix ccs){
     printf("ccs->rows: %d\n", ccs->rows);
     printf("ccs->cols: %d\n", ccs->cols);
 }
-
-Matrix
-ccsToMatrix(CCSMatrix ccs){
-    Matrix ret = nullMatrix(ccs->rows, ccs->rows);
-
-    int j = 0;
-    int elements = 0;
-
-    for(int col = 0; col < ccs->cols; col++){
-        elements += ccs->col_ptr[col+1] - ccs->col_ptr[col];
-
-        while(j < elements){
-            ret->elem[ccs->row_index[j]][col] = ccs->val[j];
-            j++;
-        }
-    }
-    return ret;
-}
-
 static inline int
 reallocret(int estimate, CCSMatrix ret){
     estimate *= 1.5;
@@ -310,33 +288,6 @@ reallocret(int estimate, CCSMatrix ret){
     return estimate;
 }
 
-CCSMatrix
-matrixToCCS(Matrix mat){
-    int elemEstimate = (mat->cols * mat->rows) * 0.1 + 6;
-    CCSMatrix ret = newCCSMatrix(elemEstimate, mat->rows, mat->cols);
-
-    for(int col = 0; col < mat->cols; col++){
-        bool columnStarterNotFound = true;
-        for(int row = 0; row < mat->rows; row++){
-            if(mat->elem[row][col] != 0.0){
-                if(ret->nnz == elemEstimate){
-                    elemEstimate = reallocret(elemEstimate, ret);
-                }
-                ret->val[ret->nnz] = mat->elem[row][col];
-                ret->row_index[ret->nnz] = row;
-                if(columnStarterNotFound){
-                    ret->col_ptr[col] = ret->nnz;
-                }
-                columnStarterNotFound = false;
-                ret->nnz++;
-            }
-        }
-    }
-    ret->col_ptr[ret->cols] = ret->nnz;
-
-    return ret;
-}
-
 void
 print_CCSMatrix(CCSMatrix ccs){
     for(int i = 0; i < ccs->rows; i++){
@@ -344,24 +295,5 @@ print_CCSMatrix(CCSMatrix ccs){
             printf("%7.3f ", ccsValueAt(i, j, ccs));
         }
         putchar('\n');
-    }
-}
-
-CCSMatrix
-transposeCRS(CRSMatrix crs){
-    CCSMatrix ret = newCCSMatrix(crs->nnz, crs->cols, crs->rows);
-    memcpy(ret->val, crs->val, crs->nnz * sizeof(ret->val[0]));
-    memcpy(ret->row_index, crs->col_index, crs->nnz * sizeof(ret->row_index[0]));
-    memcpy(ret->col_ptr, crs->row_ptr, crs->nnz * sizeof(ret->col_ptr[0]));
-
-    return ret;
-}
-
-/* FIXME Naive approach! if scalar is zero or small enough that the
- * product is rounded to zero, it breaks the data structure. */
-void
-ccsScalarMult(double scalar, CCSMatrix ccs){
-    for(int i = 0; i < ccs->nnz; i++){
-        ccs->val[i] *= scalar;
     }
 }

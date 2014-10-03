@@ -27,17 +27,6 @@ typedef struct CCSMatrixCDT {
     int      cols;
 } CCSMatrixCDT;
 
-typedef struct CRSMatrixCDT *CRSMatrix;
-
-typedef struct CRSMatrixCDT {
-    int     *col_index;
-    int     *row_ptr;
-    double  *val;
-    int      nnz;
-    int      rows;
-    int      cols;
-} CRSMatrixCDT;
-
 /* Allocate matrix of rows x cols, and initialize it with all 0 */
 Matrix nullMatrix(int rows, int cols);
 
@@ -51,9 +40,9 @@ Matrix copyMatrix(Matrix mat);
 Matrix matrixMult(Matrix m1, Matrix m2);
 
 /* Returns the A matrix of the Ising model
- * Expects size of the matrix, i.e. 2*m
+ * Expects size of the matrix, i.e. m
  */
-Matrix build_A(int size);
+Matrix build_A(int m);
 
 /* Returns the L matrix of the Ising model
  * Expects size of the matrix, i.e. 2*m
@@ -90,7 +79,7 @@ int rows(Matrix mat);
 
 CCSMatrix identityCCSMatrix(int size);
 
-CCSMatrix build_CCS_A(int size);
+CCSMatrix build_CCS_A(int m);
 
 CCSMatrix build_CCS_K(int size);
 
@@ -114,5 +103,7 @@ double ccsValueAt(int row, int col, CCSMatrix ccs);
 void printCCS(CCSMatrix ccs);
 
 void print_CCSMatrix(CCSMatrix ccs);
+
+CCSMatrix build_Fast_CCS_A(int m);
 
 #endif

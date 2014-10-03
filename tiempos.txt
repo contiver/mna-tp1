@@ -1,0 +1,173 @@
+Tiempos para la implementación de matrices densas:
+=================================================
+Matrix A for m = 100:
+./A_matrix 100  0.02s user 0.00s system 90% cpu 0.022 total
+
+Matrix A for m = 150:
+./A_matrix 150  0.05s user 0.00s system 95% cpu 0.059 total
+
+Matrix A for m = 200:
+./A_matrix 200  0.13s user 0.00s system 97% cpu 0.133 total
+
+Matrix A for m = 250:
+./A_matrix 250  0.25s user 0.00s system 99% cpu 0.252 total
+
+Matrix A for m = 300:
+./A_matrix 300  1.32s user 0.00s system 99% cpu 1.320 total
+
+Matrix A for m = 350:
+./A_matrix 350  2.88s user 0.00s system 99% cpu 2.888 total
+
+Matrix A for m = 400:
+./A_matrix 400  4.24s user 0.01s system 99% cpu 4.262 total
+
+Matrix A for m = 450:
+./A_matrix 450  6.51s user 0.05s system 99% cpu 6.557 total
+
+Matrix A for m = 500:
+./A_matrix 500  8.90s user 0.04s system 99% cpu 9.010 total
+
+Matrix A for m = 550:
+./A_matrix 550  12.05s user 0.01s system 100% cpu 12.061 total
+
+Matrix A for m = 600:
+./A_matrix 600  15.81s user 0.03s system 100% cpu 15.836 total
+
+Matrix A for m = 650:
+./A_matrix 650  20.22s user 0.04s system 99% cpu 20.351 total
+
+Matrix A for m = 700:
+./A_matrix 700  25.25s user 0.01s system 100% cpu 25.253 total
+
+Matrix A for m = 750:
+./A_matrix 750  32.36s user 0.04s system 100% cpu 32.384 total
+
+Matrix A for m = 800:
+./A_matrix 800  36.33s user 0.18s system 100% cpu 36.495 total
+
+Matrix A for m = 850:
+./A_matrix 850  46.49s user 0.18s system 99% cpu 46.871 total
+
+Matrix A for m = 900:
+./A_matrix 900  45.21s user 0.20s system 100% cpu 45.392 total
+
+Matrix A for m = 950:
+./A_matrix 950  62.82s user 0.06s system 100% cpu 1:02.61 total
+
+Matrix A for m = 1000:
+./A_matrix 1000  54.95s user 0.07s system 100% cpu 54.989 total
+
+Tiempos para la implementación de matrices CCS:
+===============================================
+
+└─╼ time ./A_matrix 100
+
+Matrix A for m = 100:
+./A_matrix 100  0.00s user 0.00s system 0% cpu 0.003 total
+
+Matrix A for m = 150:
+./A_matrix 150  0.00s user 0.00s system 89% cpu 0.004 total
+
+Matrix A for m = 200:
+./A_matrix 200  0.00s user 0.00s system 64% cpu 0.005 total
+
+Matrix A for m = 250:
+./A_matrix 250  0.01s user 0.00s system 90% cpu 0.007 total
+
+Matrix A for m = 300:
+./A_matrix 300  0.01s user 0.00s system 86% cpu 0.008 total
+
+Matrix A for m = 350:
+./A_matrix 350  0.01s user 0.00s system 81% cpu 0.012 total
+
+Matrix A for m = 400:
+./A_matrix 400  0.01s user 0.00s system 88% cpu 0.015 total
+
+Matrix A for m = 450:
+./A_matrix 450  0.02s user 0.00s system 91% cpu 0.018 total
+
+Matrix A for m = 500:
+./A_matrix 500  0.02s user 0.00s system 87% cpu 0.023 total
+
+Matrix A for m = 550:
+./A_matrix 550  0.02s user 0.00s system 90% cpu 0.026 total
+
+Matrix A for m = 600:
+./A_matrix 600  0.03s user 0.00s system 88% cpu 0.030 total
+
+Matrix A for m = 650:
+./A_matrix 650  0.03s user 0.00s system 92% cpu 0.036 total
+
+Matrix A for m = 700:
+./A_matrix 700  0.04s user 0.00s system 97% cpu 0.037 total
+
+Matrix A for m = 750:
+./A_matrix 750  0.04s user 0.00s system 95% cpu 0.045 total
+
+Matrix A for m = 800:
+./A_matrix 800  0.05s user 0.00s system 92% cpu 0.050 total
+
+Matrix A for m = 850:
+./A_matrix 850  0.06s user 0.00s system 96% cpu 0.058 total
+
+Matrix A for m = 900:
+./A_matrix 900  0.06s user 0.00s system 95% cpu 0.059 total
+
+Matrix A for m = 950:
+./A_matrix 950  0.06s user 0.00s system 99% cpu 0.060 total
+
+Matrix A for m = 1000:
+./A_matrix 1000  0.07s user 0.00s system 99% cpu 0.067 total
+
+Matrix A for m = 10000:
+./A_matrix 10000  3.19s user 0.00s system 100% cpu 3.193 total
+
+Matrix A for m = 20000:
+^C
+./A_matrix 20000  7.14s user 0.00s system 99% cpu 7.145 total
+
+Matrix A for m = 25000:
+./A_matrix 25000  19.59s user 0.00s system 100% cpu 19.590 total
+
+Matrix A for m = 30000:
+./A_matrix 30000  28.22s user 0.01s system 100% cpu 28.213 total
+
+Matrix A for m = 35000:
+./A_matrix 35000  39.30s user 0.00s system 100% cpu 39.278 total
+
+Matrix A for m = 40000:
+./A_matrix 40000  52.50s user 0.01s system 100% cpu 52.492 total
+
+Matrix A for m = 45000:
+./A_matrix 45000  63.79s user 0.01s system 100% cpu 1:03.77 total
+
+Matrix A for m = 50000:
+./A_matrix 50000  82.33s user 0.01s system 100% cpu 1:22.29 total
+
+Matrix A for m = 55000:
+./A_matrix 55000  98.73s user 0.01s system 100% cpu 1:38.69 total
+
+Matrix A for m = 60000:
+./A_matrix 60000  114.02s user 0.01s system 100% cpu 1:53.97 total
+
+Matrix A for m = 70000:
+./A_matrix 70000  157.40s user 0.01s system 100% cpu 2:37.33 total
+└─╼ time ./A_matrix 75000
+
+Matrix A for m = 75000:
+./A_matrix 75000  179.75s user 0.73s system 100% cpu 3:00.40 total
+┌─[ localhost ~/itba/mna/tp1  ]
+└─╼ time ./A_matrix 80000
+
+Matrix A for m = 80000:
+./A_matrix 80000  203.26s user 0.01s system 100% cpu 3:23.17 total
+┌─[ localhost ~/itba/mna/tp1  ]
+└─╼ time ./A_matrix 85000
+
+Matrix A for m = 85000:
+./A_matrix 85000  227.82s user 0.00s system 100% cpu 3:47.72 total
+┌─[ localhost ~/itba/mna/tp1  ]
+└─╼ time ./A_matrix 90000
+
+Matrix A for m = 90000:
+./A_matrix 90000  254.88s user 0.43s system 100% cpu 4:15.00 total

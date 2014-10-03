@@ -15,10 +15,10 @@ static inline int reallocret(int estimate, CCSMatrix ret);
 
 CCSMatrix
 newCCSMatrix(int nnz, int rows, int cols){
-    CCSMatrix ret      = malloc(sizeof(CCSMatrixCDT));
-    ret->val           = malloc(nnz * sizeof (ret->val[0]));
-    ret->row_index     = malloc(nnz * sizeof (ret->row_index[0]));
-    ret->col_ptr       = malloc((cols +1) * sizeof (ret->col_ptr[0]));
+    CCSMatrix ret      = xmalloc(sizeof(CCSMatrixCDT));
+    ret->val           = xmalloc(nnz * sizeof (ret->val[0]));
+    ret->row_index     = xmalloc(nnz * sizeof (ret->row_index[0]));
+    ret->col_ptr       = xmalloc((cols +1) * sizeof (ret->col_ptr[0]));
     ret->nnz           = nnz;
     ret->rows          = rows;
     ret->cols          = cols;
@@ -56,6 +56,74 @@ build_CCS_A(int m){
     CCSMatrix A = ccsMult(K,L);
     freeCCSMatrix(K);
     freeCCSMatrix(L);
+    return A;
+}
+
+CCSMatrix
+build_Fast_CCS_A(int m){
+    int size = 2*m;
+
+    if(m == 1) return identityCCSMatrix(size);
+
+    CCSMatrix A = newCCSMatrix(8*m, size, size);
+    double alfa  = PI / 4;
+    double beta  = PI / 4;
+    double a1    = sin(alfa)*cos(alfa);
+    double a2    = cos(alfa)*cos(beta);
+    double b1    = sin(alfa)*sin(beta);
+    double b2    = cos(alfa)*sin(beta);
+    double c1    = -b2;
+    double c2    = b1;
+    double d1    = a2;
+    double d2    = -a1;
+
+    A->col_ptr[0]         = 0;
+    A->val[0]             = d1;
+    A->row_index[0]       = 0;
+    A->val[1]             = d2;
+    A->row_index[1]       = 1;
+    A->val[2]             = b1;
+    A->row_index[2]       = size-2;
+    A->val[3]             = b2;
+    A->row_index[3]       = size-1;
+
+    A->col_ptr[A->cols-1] = A->nnz-4;
+    A->val[A->nnz-4]        = c1;
+    A->row_index[A->nnz-4]  = 0;
+    A->val[A->nnz-3]        = c2;
+    A->row_index[A->nnz-3]  = 1;
+    A->val[A->nnz-2]        = a1;
+    A->row_index[A->nnz-2]  = size-2;
+    A->val[A->nnz-1]        = a2;
+    A->row_index[A->nnz-1]  = size-1;
+
+    for(int i = 4, j = 1, counter = 4; i < A->nnz - 4; j += 2, counter += 8){
+        A->col_ptr[j] = counter;
+        A->val[i] = a1;
+        A->row_index[i++] = j-1;
+
+        A->val[i] = a2;
+        A->row_index[i++] = j;
+
+        A->val[i] = c1;
+        A->row_index[i++] = j+1;
+
+        A->val[i] = c2;
+        A->row_index[i++] = j+2;
+
+        A->col_ptr[j+1] = counter + 4;
+        A->val[i] = b1;
+        A->row_index[i++] = j-1;
+
+        A->val[i] = b2;
+        A->row_index[i++] = j;
+
+        A->val[i] = d1;
+        A->row_index[i++] = j+1;
+
+        A->val[i] = d2;
+        A->row_index[i++] = j+2;
+    }
     return A;
 }
 
@@ -130,34 +198,26 @@ build_CCS_L(int size){
 
 CCSMatrix
 ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
-    int elemEstimate = 6 + (ccs1->rows * ccs2->cols) * 0.1;
-    CCSMatrix ret    = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
+    int elemEstimate = (ccs1->rows / 2) * 8; // Right amount for matrix A
     int nnz = 0;
     int stepsToBacktrack = 0;
     double currentVal = 0.0;
     bool columnStarterNotFound;
-
-    // TODO ver si esto todavía es necesario !
-    //for(i = 0; i < ret->cols; i++){
-        //ret->col_ptr[i] = -1;
-    //}
+    CCSMatrix ret = newCCSMatrix(elemEstimate, ccs1->rows, ccs2->cols);
 
     for(int j = 0; j < ccs2->cols; j++){
         columnStarterNotFound = true;
+        if(ccs2->col_ptr[j+1] - ccs2->col_ptr[j] == 0){
+            stepsToBacktrack++;
+            continue;
+        }
+
         for(int i = 0; i < ccs1->rows; i++){
             currentVal = 0.0;
-
-            // If no nonzero elements are present in the column...
-            if(ccs2->col_ptr[j+1] - ccs2->col_ptr[j] == 0){
-                // The element is zero, so just continue with the next one.
-                stepsToBacktrack++;
-                break;
-            }
 
             for(int k = ccs2->col_ptr[j]; k < ccs2->col_ptr[j+1]; k++){
                 double ccs1Val = ccsValueAt(i ,ccs2->row_index[k], ccs1);
                 currentVal += ccs1Val * ccs2->val[k];
-                //currentVal += ccsValueAt(i ,ccs2->row_index[k], ccs1) * ccs2->val[k];
             }
 
             if(fabs(currentVal) < EPSILON){
@@ -182,9 +242,6 @@ ccsMult(CCSMatrix ccs1, CCSMatrix ccs2){
             ret->row_index[nnz] = i;
             nnz++;
         }
-        // Needed for the case in which even though there are elements in the
-        // column the total sum is zero.
-        //if(ret->col_ptr[j] == -1) stepsToBacktrack++;
     }
     ret->nnz = nnz;
     ret->col_ptr[ret->cols] = nnz;
@@ -197,25 +254,6 @@ ccsValueAt(int row, int col, CCSMatrix ccs){
         if(ccs->row_index[i] == row) return ccs->val[i];
     }
     return 0.0;
-}
-
-/* reallocates memory to use just the necessary amount */
-bool
-reallocCCS(CCSMatrix ccs){
-    double *dp;
-    int    *ip;
-    int    *ip2;
-
-    dp  = realloc(ccs->val, ccs->nnz * sizeof(ccs->val[0]));
-    ip  = realloc(ccs->row_index, ccs->nnz * sizeof(ccs->row_index[0]));
-    ip2 = realloc(ccs->col_ptr, (ccs->cols + 1) * sizeof(ccs->col_ptr[0]));
-
-    if(!dp || !ip || !ip2) return false;
-
-    ccs->val       = dp;
-    ccs->row_index = ip;
-    ccs->col_ptr   = ip2;
-    return true;
 }
 
 void

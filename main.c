@@ -12,13 +12,18 @@ main(int argc, char *argv[]){
     int m;
     sscanf(argv[1], "%d", &m);
 
-    CCSMatrix A = build_CCS_A(m);
-
     printf("\nMatrix A for m = %d:\n", m);
-    printCCS(A);
+
+    CCSMatrix A = build_Fast_CCS_A(m);
+    /*
+    CCSMatrix A2 = build_CCS_A(m);
     print_CCSMatrix(A);
+    printf("esta es A2\n");
+    print_CCSMatrix(A2);
+    //print_CCSMatrix(A);
 
-    freeCCSMatrix(A);
+//    printMatrix(A);
 
+*/
     return EXIT_SUCCESS;
 }

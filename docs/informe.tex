@@ -419,22 +419,27 @@ a \emph{malloc} para reservar la memoria necesaria).
 \section{Busqueda de autovalores}
 Para calcular los autovalores de la matriz se utilizó el procedimiento
 recomendado en ``Matrix Market''. En el mismo, se obtienen los autovalores de la
-matriz de $2m \times 2m$, \emph{A} = \emph{K} \emph{L}, calculando los autovalores de las m matrices de
+matriz de $2m \times 2m$, $A = K \cdot L$, calculando los autovalores de las m matrices de
 $2 \times 2$. \\
 
-Mediante la función compareEigenvalueMethods se puede comprobar que los $2m$
-autovalores de las m matrices de dos por dos corresponden a una buena
-aproximación de los autovalores de la matrix A. \\
+Mediante la función \verb+compareEigenvalueMethods+ se puede comprobar que los $2m$
+autovalores de las $m$ matrices de $2 \times 2$ corresponden a una buena
+aproximación de los autovalores de la matriz $A$. \\
 
-Para obtener los autovalores de las matrices de 2x2 se resuelve el polinomio
-característico a partir de la fórmula cuadrática. Como comparación, se
-obtuvieron los autovalores de la matriz A a partir de la función de octave eig,
+Para obtener los autovalores de las matrices de $2 \times 2$ se resuelve el polinomio
+característico a partir de la fórmula cuadrática:
+
+\begin{equation}
+    \lambda_{1,2} = \frac{tr(A) + \sqrt{tr(A)^2 - 4 \cdot det(A)}}{2}
+\end{equation}
+
+Como comparación, se obtuvieron los autovalores de la matriz A a partir de la función de octave eig,
 y se comprobó que nuestros resultados eran correctos.\\
 
-Utilizando la función getEigenvalues, se pudo X de autovalores. Debido a que
-sólo se deben crear y multiplicar matrices de 2x2, para luego obtener los
+Utilizando la función \verb+getEigenvalues+, se calculan los autovalores. Debido a que
+sólo se deben crear y multiplicar matrices de $2 \times 2$, para luego obtener los
 autovalores a partir de un método algebraico, se pueden calcular un gran número
-de autovalores en tiempos razonable, como se puede apreciar en la siguiente tabla:\\
+de autovalores en tiempos razonable, como se puede apreciar en la siguiente tabla:\\ \\
 \begin{tabular}{|l||l|}
 \hline
 \multicolumn{2}{|l|}{Multiplicaci\'on est\'andar}\\
@@ -447,25 +452,25 @@ de autovalores en tiempos razonable, como se puede apreciar en la siguiente tabl
 10000 & 2.541\\
 100000 & 39.905\\
 \hline
-\end{tabular}\\
+\end{tabular}\\ \\
 
-En un principio se intentó utilizar el algoritmo QR para obtener los
-autovalores de A. Este acercamiento no di\'o resultados, ya que se not\'o que la
+En un principio se intentó utilizar el algoritmo $QR$ para obtener los
+autovalores de $A$. Este acercamiento no di\'o resultados, ya que se not\'o que la
 matriz no converg\'ia a una forma triangular. En un principio se pens\'o que esto
 se deb\'ia a la existencia de autovalores complejos, pero luego se descubri\'o que
-la raz\'on era que la matriz A es ortogonal, por lo tanto al descomponer en
-matrices QR, resulta que Q equivale a A, y R a la matriz identidad. Por lo tanto, se opt\'o por
+la raz\'on era que la matriz $A$ es ortogonal, por lo tanto al descomponer en
+matrices $QR$, resulta que $Q$ equivale a $A$, y $R$ a la matriz identidad. Por lo tanto, se opt\'o por
 calcular los autovalores de las matrices de $2 \times 2$.\\
 
-La matriz A que se obtiene de multiplicar K por L es rala, especialmente para
-valores grandes de $m$. Debido a esto, el algoritmo QR, de haber funcionado,
+La matriz $A$ que se obtiene de multiplicar $K$ por $L$ es rala, especialmente para
+valores grandes de $m$. Debido a esto, el algoritmo $QR$, de haber funcionado,
 habr\'ia sido muy ineficiente para calcular los autovalores. En un principio, se
 pens\'o en utilizar el M\'etodo de Arnoldi. Este procedimiento iterativo para
-matrices ralas, va generando a partir de A una matriz de Hessenberg. Una
+matrices ralas, va generando a partir de $A$ una matriz de Hessenberg. Una
 fracci\'on de los autovalores de esta matriz son una buena aproximaci\'on a los
-autovalores de A. Adicionalmente, el algoritmo QR corre mucho m\'as
+autovalores de $A$. Adicionalmente, el algoritmo $QR$ corre mucho m\'as
 eficientemente sobre matrices de Hessenberg, por lo tanto, el M\'etodo de
-Arnoldi, da la posibilidad de conseguir un conjunto de autovalores de A de
+Arnoldi, da la posibilidad de conseguir un conjunto de autovalores de $A$ de
 manera eficiente. \\
 \newpage
 \section{Conclusiones}

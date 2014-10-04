@@ -245,7 +245,7 @@ de memoria RAM. A continuaci\'on se muestra una tabla con los valores que se
 utilizaron en las pruebas, y luego los gr\'aficos que se realizaron a partir de
 ellas.\\
 \\
-
+{\centering
 \begin{tabular}{|l||l|l||l|}
 \hline
 \multicolumn{2}{|l|}{Multiplicaci\'on est\'andar}&\multicolumn{2}{l|}{Multiplicaci\'on CCS}\\
@@ -279,8 +279,8 @@ ellas.\\
  &  & 40000 & 52.50\\
  &  & 45000 & 63.79\\
 \hline
-\end{tabular}\\
-\\
+\end{tabular}\\[6pt]
+}
 \small\emph{Tabla 1: Muestra el tiempo en segundos, que tardaron los dos algoritmos implementados respectivamente, a partir de distintos valores de m.}
 
 \subsubsection{Primera iteraci\'on}
@@ -416,13 +416,13 @@ al probar con 300 millones, ya el sistema operativo retorn\'o NULL al llamar
 a \emph{malloc} para reservar la memoria necesaria).
 
 \newpage
-\section{Busqueda de autovalores}
-Para calcular los autovalores de la matriz se utilizó el procedimiento
+\section{B\'usqueda de autovalores}
+Para calcular los autovalores de la matriz se utiliz\'o el procedimiento
 recomendado en ``Matrix Market''. En el mismo, se obtienen los autovalores de la
 matriz de $2m \times 2m$, $A = K \cdot L$, calculando los autovalores de las m matrices de
 $2 \times 2$. \\
 
-Mediante la función \verb+compareEigenvalueMethods+ se puede comprobar que los $2m$
+Mediante la funci\'on \verb+compareEigenvalueMethods+ se puede comprobar que los $2m$
 autovalores de las $m$ matrices de $2 \times 2$ corresponden a una buena
 aproximación de los autovalores de la matriz $A$. \\
 
@@ -440,6 +440,7 @@ Utilizando la función \verb+getEigenvalues+, se calculan los autovalores. Debid
 sólo se deben crear y multiplicar matrices de $2 \times 2$, para luego obtener los
 autovalores a partir de un método algebraico, se pueden calcular un gran número
 de autovalores en tiempos razonable, como se puede apreciar en la siguiente tabla:\\ \\
+{\centering
 \begin{tabular}{|l||l|}
 \hline
 \multicolumn{2}{|l|}{Multiplicaci\'on est\'andar}\\
@@ -451,8 +452,10 @@ de autovalores en tiempos razonable, como se puede apreciar en la siguiente tabl
 1000 & 0.304\\
 10000 & 2.541\\
 100000 & 39.905\\
+1000000 & 4400.470\\
 \hline
-\end{tabular}\\ \\
+\end{tabular}\\[10pt]
+}
 
 En un principio se intentó utilizar el algoritmo $QR$ para obtener los
 autovalores de $A$. Este acercamiento no di\'o resultados, ya que se not\'o que la
@@ -472,7 +475,6 @@ autovalores de $A$. Adicionalmente, el algoritmo $QR$ corre mucho m\'as
 eficientemente sobre matrices de Hessenberg, por lo tanto, el M\'etodo de
 Arnoldi, da la posibilidad de conseguir un conjunto de autovalores de $A$ de
 manera eficiente. \\
-\newpage
 \section{Conclusiones}
 La matriz A del modelo de Ising representa un buen ejemplo de la importancia de
 la correcta elecci\'on de una estructura de datos adecuada, y algoritmos
@@ -486,15 +488,14 @@ algoritmo final utilizado ni siquiera necesit\'o de la construcci\'on de A para
 poder calcular sus autovalores.
 
 \paragraph{}
-\newpage
 \section{Bibliograf\'ia}
 Watkins, David S., Fundamentals of Matrix Computations. New York: John Wiley \&
-Sons, Inc., 2002\\
+Sons, Inc., 2002\\[5pt]
 Yousef, Saad, Numerical Methods For Large Eigenvalue Problems. Society for
-Industrial and Applied Mathematics, 2011\\
+Industrial and Applied Mathematics, 2011\\[5pt]
 Gene H. Golub \& Charles F. Van Loan, Matrix computations, The Johns Hopkins
-University Press, Baltimore, 1996\\
-\url{http://en.wikipedia.org/wiki/Sparse_matrix}
-\url{http://netlib.org/linalg/html_templates/node91.html#SECTION00931100000000000000}
-\url{http://netlib.org/linalg/html_templates/node92.html#SECTION00931200000000000000}
+University Press, Baltimore, 1996\\[5pt]
+\url{http://en.wikipedia.org/wiki/Sparse_matrix}\\[5pt]
+\url{http://netlib.org/linalg/html_templates/node91.html#SECTION00931100000000000000}\\[5pt]
+\url{http://netlib.org/linalg/html_templates/node92.html#SECTION00931200000000000000}\\[5pt]
 \end{document}
